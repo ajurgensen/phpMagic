@@ -1,0 +1,21 @@
+{
+    "name": "ajurgensen/php-magic",
+    "description": "phpMagic: Propel ORM & Bootstrap integrated to make building Pages, Forms & Lists easy",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andreas Jurgensen",
+            "email": "andreas@jurgensen.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ajurgensen\\phpMagic\\": "src/"
+        }
+    }
+}
