@@ -12,6 +12,9 @@ Takes Propel ORM Object and creates a bootstrap form - Also build lists and whol
  - Use to create lists of objects
  - Use to create whole pages (with auth etc)
 
+Installation:
+composer require ajurgensen/phpMagic
+
 Some ways of using phpMagic
 
     //Edit for User 
