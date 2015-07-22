@@ -26,10 +26,30 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
+use Base\Creative;
+
 class listMagic
 {
     private $html;
     public $HTMLready;
+    private $options;
+    private $fromPropel;
+
+    /**
+     * @return mixed
+     */
+    public function getFromPropel()
+    {
+        return $this->fromPropel;
+    }
+
+    /**
+     * @param mixed $fromPropel
+     */
+    public function setFromPropel($fromPropel)
+    {
+        $this->fromPropel = $fromPropel;
+    }
 
     private function addHTML($html)
     {
@@ -54,7 +74,9 @@ class listMagic
 
     function __construct($entites,$options='')
     {
+        $this->options = $options;
         $this->HTMLready = true;
+        $this->setFromPropel(0);
         $this->html = '';
         $cols = array();
         if (!count($entites))
@@ -70,50 +92,73 @@ class listMagic
         {
             $map = $entity::TABLE_MAP;
             $map = $map::getTableMap();
+            if ($mock = $entity->toArray())
+            {
+                $this->setFromPropel(1);
+            }
         }
-        if (isset($options['LM_LINK']))
+        if (isset($this->options['LM_LINK']) && is_array($this->options['LM_LINK']))
         {
-            $linkname = $options['LM_LINK'];
+            foreach ($this->options['LM_LINK'] as $key=>$value)
+            {
+                $linkarray[$key] = $value;
+            }
+
         } else
         {
             $nolinking = 1;
         }
+
 
         //First loop, build structure
         if (isset($map))
         {
             foreach ($map->getColumns() as $colum)
             {
-                if (isset($options['LM_EXCLUDE']) && in_array($colum->getName(), $options['LM_EXCLUDE']))
+                if (isset($this->options['LM_EXCLUDE']) && in_array($colum->getName(), $this->options['LM_EXCLUDE']))
                 {
                     //excluded
-                } elseif (!$nolinking && in_array($colum->getName(), $linkname))
+                }
+                elseif (!$nolinking && array_key_exists($colum->getName(), $linkarray))
                 {
                     //Name field - add id link!
                     $cols[$colum->getName()]['headername'] = $colum->getName();
                     $cols[$colum->getName()]['getdatastring'] = $this->propelFormatColName('get' . $this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'LINK';
-                } elseif ($colum->getType() == 'VARCHAR')
+                    $cols[$colum->getName()]['link'] = $linkarray[$colum->getName()];
+                }
+                elseif ($colum->getType() == 'VARCHAR')
                 {
                     //Normal VARCHAR field
                     $cols[$colum->getName()]['headername'] = $colum->getName();
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'VARCHAR';
-                } elseif ($colum->getType() == 'INTEGER' && $colum->getName() !== 'id')
+                }
+                elseif ($this->getFromPropel() && $colum->isForeignKey())
+                {
+                    //Link to other table
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['remoteTableName'] = ucfirst(strtolower($colum->getRelatedTableName()));
+                    $cols[$colum->getName()]['type'] = 'REMOTENAME';
+                }
+                elseif ($colum->getType() == 'INTEGER' && $colum->getName() !== 'id')
                 {
                     //Integer field
                     $cols[$colum->getName()]['headername'] = $colum->getName();
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'INTEGER';
-                } elseif ($colum->getType() == 'TIMESTAMP')
+                }
+                elseif ($colum->getType() == 'TIMESTAMP')
                 {
-                    //Integer field
+                    //Timestamp field
                     $cols[$colum->getName()]['headername'] = $colum->getName();
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'TIMESTAMP';
                 }
             }
         }
+
 
         $headers = array();
         $dataarray = array();
@@ -125,9 +170,29 @@ class listMagic
             {
                 if (!isset($headers[$col['headername']]))
                 {
-                    $headers[$col['headername']] = $col['headername'];
+                    if (isset($options['LM_DESCRIPTION'][$col['headername']]))
+                    {
+                        $headers[$col['headername']] = $options['LM_DESCRIPTION'][$col['headername']];
+                    }
+                    else
+                    {
+                        $headers[$col['headername']] = $col['headername'];
+                    }
                 }
-                $data = $entity->{$col['getdatastring']}();
+                if ($col['type'] == 'REMOTENAME')
+                {
+
+                    $remote_id = $entity->{$col['getdatastring']}();
+                    $remoteQueryName = ucfirst(strtolower($col['remoteTableName'])) . "Query::create";
+                    $remoteQuery = call_user_func($remoteQueryName);
+                    $remoteEntity = $remoteQuery->findOneById($remote_id);
+                    $data = $remoteEntity->getName();
+
+                }
+                else
+                {
+                    $data = $entity->{$col['getdatastring']}();
+                }
                 if ($col['type'] == 'TIMESTAMP' && ($data instanceof DateTime))
                 {
                     $data = $data->format('Y-m-d H:i:s');
@@ -138,16 +203,44 @@ class listMagic
                     {
                         $data = '_';
                     }
-                    $data = '<a href="' . $entity->link . '">' . $data . '</a>';
+                    $data = '<a href="' . $entity->{$col['link']} . '">' . $data . '</a>';
                 }
                 $fieldarray[] = $data;
+            }
 
+            foreach ($entity->getVirtualColumns() as $key=>$value)
+            {
+                if (!isset($headers[$key]))
+                {
+                    if (isset($options['LM_DESCRIPTION'][$key]))
+                    {
+                        $headers[$key] = $options['LM_DESCRIPTION'][$key];
+                    }
+                    else
+                    {
+                        $headers[$key] = $key;
+                    }
+                }
+                if (array_key_exists($key, $linkarray))
+                {
+                    $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
+
+                }
+                else
+                {
+                    $fieldarray[] = $value;
+                }
 
             }
+
             $dataarray[] = $fieldarray;
         }
 
-        if (isset($map))
+        if (isset($options['LM_NAME']))
+        {
+            $name = $options['LM_NAME'];
+        }
+        elseif (isset($map))
         {
             $name = $map->getName();
         }
@@ -186,9 +279,9 @@ class listMagic
         }
 
         $afterTableComment = '';
-        if (isset($options['LM_ADDNEW']))
+        if (isset($this->options['LM_ADDNEW']))
         {
-            $afterTableComment = '<p><a href="'. $options['LM_ADDNEW'] .'">Add New ' . $name .'</a></p>';
+            $afterTableComment = '<a href="'. $this->options['LM_ADDNEW'] .'">Add New ' . $name .'</a></p>';
         }
         $this->endHTML($afterTableComment);
 
@@ -198,10 +291,18 @@ class listMagic
 
     private function initHTML($title)
     {
+        if (isset($this->options['LM_DONTSORT']))
+        {
+            $sortable = '';
+        }
+        else
+        {
+            $sortable = 'sortable';
+        }
         $this->addHTML('<div class="panel panel-default">
 <div class="panel-heading"><h3 class="panel-title">' . $title. '</h3></div>
 <div class="panel-body">
-<table class="col-md-12 table-bordered table-striped table-condensed cf sortable">'
+<table class="col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">'
         );
     }
 
