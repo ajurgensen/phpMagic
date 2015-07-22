@@ -128,7 +128,7 @@ class formMagic
                 try
                 {
                     $remoteEntities = $entity->{$name}();
-                } catch (Exception $e)
+                } catch (\Exception $e)
                 {
 
                     $name = ucfirst(strtolower($colum->getRelatedTableName())) . "Query::create";

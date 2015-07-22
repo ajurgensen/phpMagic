@@ -57,53 +57,61 @@ class listMagic
         $this->HTMLready = true;
         $this->html = '';
         $cols = array();
-        $entity = $entites[0];
+        if (!count($entites))
+        {
+
+        } else
+        {
+            $entity = $entites[0];
+        }
+
         $nolinking = 0;
-        $map = $entity::TABLE_MAP;
-        $map = $map::getTableMap();
+        if (isset($entity))
+        {
+            $map = $entity::TABLE_MAP;
+            $map = $map::getTableMap();
+        }
         if (isset($options['LM_LINK']))
         {
             $linkname = $options['LM_LINK'];
-        }
-        else
+        } else
         {
             $nolinking = 1;
         }
 
         //First loop, build structure
-        foreach ($map->getColumns() as $colum)
+        if (isset($map))
         {
-            if (isset($options['LM_EXCLUDE']) && in_array($colum->getName(), $options['LM_EXCLUDE']))
+            foreach ($map->getColumns() as $colum)
             {
-                //excluded
-            }
-            elseif (!$nolinking && in_array($colum->getName(),$linkname))
-            {
-                //Name field - add id link!
-                $cols[$colum->getName()]['headername'] =  $colum->getName();
-                $cols[$colum->getName()]['getdatastring'] =  $this->propelFormatColName('get' . $this->propelFormatColName($colum->getName()));
-                $cols[$colum->getName()]['type'] = 'LINK';
-            }
-            elseif ($colum->getType() == 'VARCHAR')
-            {
-                //Normal VARCHAR field
-                $cols[$colum->getName()]['headername'] =  $colum->getName();
-                $cols[$colum->getName()]['getdatastring'] =  'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
-                $cols[$colum->getName()]['type'] = 'VARCHAR';
-            }
-            elseif ($colum->getType() == 'INTEGER' && $colum->getName() !== 'id' )
-            {
-                //Integer field
-                $cols[$colum->getName()]['headername'] =  $colum->getName();
-                $cols[$colum->getName()]['getdatastring'] =  'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
-                $cols[$colum->getName()]['type'] = 'INTEGER';
-            }
-            elseif ($colum->getType() == 'TIMESTAMP')
-            {
-                //Integer field
-                $cols[$colum->getName()]['headername'] =  $colum->getName();
-                $cols[$colum->getName()]['getdatastring'] =  'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
-                $cols[$colum->getName()]['type'] = 'TIMESTAMP';
+                if (isset($options['LM_EXCLUDE']) && in_array($colum->getName(), $options['LM_EXCLUDE']))
+                {
+                    //excluded
+                } elseif (!$nolinking && in_array($colum->getName(), $linkname))
+                {
+                    //Name field - add id link!
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = $this->propelFormatColName('get' . $this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'LINK';
+                } elseif ($colum->getType() == 'VARCHAR')
+                {
+                    //Normal VARCHAR field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'VARCHAR';
+                } elseif ($colum->getType() == 'INTEGER' && $colum->getName() !== 'id')
+                {
+                    //Integer field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'INTEGER';
+                } elseif ($colum->getType() == 'TIMESTAMP')
+                {
+                    //Integer field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'TIMESTAMP';
+                }
             }
         }
 
@@ -113,62 +121,74 @@ class listMagic
         foreach ($entites as $entity)
         {
             $fieldarray = array();
-            foreach($cols as $col)
+            foreach ($cols as $col)
             {
                 if (!isset($headers[$col['headername']]))
                 {
                     $headers[$col['headername']] = $col['headername'];
                 }
                 $data = $entity->{$col['getdatastring']}();
-                if ($col['type'] == 'TIMESTAMP' && ( $data instanceof DateTime))
+                if ($col['type'] == 'TIMESTAMP' && ($data instanceof DateTime))
                 {
                     $data = $data->format('Y-m-d H:i:s');
                 }
-                if ($col['type'] == 'LINK' )
+                if ($col['type'] == 'LINK')
                 {
                     if (!$data)
                     {
                         $data = '_';
                     }
-                    $data = '<a href="'. $entity->link .'">' . $data .'</a>';
+                    $data = '<a href="' . $entity->link . '">' . $data . '</a>';
                 }
                 $fieldarray[] = $data;
-
 
 
             }
             $dataarray[] = $fieldarray;
         }
 
-        //Third loop, build HTML from objects
-        $this->initHTML($map->getName());
+        if (isset($map))
+        {
+            $name = $map->getName();
+        }
+        else
+        {
+            $name = '';
+        }
+            //Third loop, build HTML from objects
+            $this->initHTML($name);
 
         $this->addHTML('<thead class="cf"><tr>');
 
         foreach ($headers as $header)
         {
-            $this->addHTML('<th>'. $header .'</th>');
+            $this->addHTML('<th>' . $header . '</th>');
         }
 
         $this->addHTML('</thead></tr>');
 
 
-        foreach($dataarray as $fieldarray)
+        foreach ($dataarray as $fieldarray)
         {
             $this->addHTML('<tr>');
-            foreach($fieldarray as $col)
+            foreach ($fieldarray as $col)
             {
+                if (is_a($col, "DateTime"))
+                {
+                    $col = $col->format('D, d M y H:i:s');
+                }
                 $this->addHTML('<td>');
-                $this->addHTML($col);
+                $this->addHTML((string)$col);
                 $this->addHTML('</td>');
             }
 
             $this->addHTML('</tr>');
         }
+
         $afterTableComment = '';
         if (isset($options['LM_ADDNEW']))
         {
-            $afterTableComment = '<p><a href="'. $options['LM_ADDNEW'] .'">Add New ' . $map->getName() .'</a></p>';
+            $afterTableComment = '<p><a href="'. $options['LM_ADDNEW'] .'">Add New ' . $name .'</a></p>';
         }
         $this->endHTML($afterTableComment);
 
