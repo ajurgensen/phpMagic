@@ -67,7 +67,7 @@ class map
     {
         foreach($array as $line)
         {
-            $col = new Colum($line[0],$line[1],$line[2]);
+            $col = new \ajurgensen\phpMagic\colum($line[0],$line[1],$line[2]);
             $this->addColumn($col);
         }
     }

@@ -50,6 +50,12 @@ class formMagic
         $this->fromPropel = $fromPropel;
     }
 
+    /**
+     * @param Array $entity Entity to build form from
+     * @param Array $options FM_DESCRIPTION FM_OPTIONS  FM_ADDONS FM_NAME FM_DESC FM_EXCLUDE
+     * @param Array $names array of 'tablename' => 'Name Shown'
+     * @param int $debug Enable debug or not - Defaults to not
+     */
     function __construct($entity, $options,$names,$debug = 0)
     {
         $this->entitySaved = false;
@@ -88,7 +94,27 @@ class formMagic
                 return true;
             }
         }
-        $html = $this->initForm($map);
+
+
+        if (isset($options['FM_NAME']))
+        {
+            $name = $options['FM_NAME'];
+        }
+        else
+        {
+            $name = ucfirst($map->getName());
+        }
+
+        if (isset($options['FM_DESC']))
+        {
+            $desc = $options['FM_DESC'];
+        }
+        else
+        {
+            $desc = 'Edit ' . $map->getName();
+        }
+
+        $html = $this->initForm($name,$desc);
         foreach ($map->getColumns() as $colum)
         {
             //If we have POST data and are here, it's an error situation, use that data and not DB data
@@ -208,7 +234,18 @@ class formMagic
                     {
                         $optionarray[$out->getId()] = $out->getName();
                     }
-                    $html .= $this->addFormMultiSelect($addon_table, $addon_link, $optionarray, $values);
+
+                    if (isset($options['FM_DESCRIPTION'][$addon_table]))
+                    {
+                        $name = $options['FM_DESCRIPTION'][$addon_table];
+                    }
+                    else
+                    {
+                        $name = $addon_table;
+                    }
+
+
+                    $html .= $this->addFormMultiSelect($name, $addon_link, $optionarray, $values);
                 }
             }
         }
@@ -259,11 +296,11 @@ class formMagic
      * @param $map
      * @return string
      */
-    private function initForm($map)
+    private function initForm($name,$desc)
     {
         $html = '<div class="panel panel-default">';
-        $html .= '<div class="panel-heading">Edit ' . $map->getName() . '</div>';
-        $html .= '<div class="panel-body"><p>' . "This is where you edit " . $map->getName() . '</p></div>';
+        $html .= '<div class="panel-heading"><h3>' . $name . '</h3></div>';
+        $html .= '<div class="panel-body"><p>' . $desc . '</p></div>';
         $html .= '<ul class="list-group">';
         $html .= '<form method="post">';
         $html .= '<div class="form-group">';
@@ -368,7 +405,8 @@ class formMagic
      */
     private function addFormMultiSelect($nicename,$name, array $optionarray, array $selected)
     {
-        $html = "<select data-parsley-trigger='change' required multiple class='form-control' name='" . $name . "[]'>";
+        $count = count($optionarray);
+        $html = "<select data-parsley-trigger='change' size='" .$count . "' required multiple class='form-control' name='" . $name . "[]'>";
         foreach ($optionarray as $key => $value)
         {
             $sel = '';

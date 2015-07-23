@@ -26,8 +26,11 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
-use Base\Creative;
 
+/**
+ * Class listMagic
+ * @package ajurgensen\phpMagic
+ */
 class listMagic
 {
     private $html;
@@ -72,7 +75,11 @@ class listMagic
 
     }
 
-    function __construct($entites,$options='')
+    /**
+     * @param Array $entites Collection of entities to be listed. Could be a list of Propel Objects
+     * @param Array $options LM_LINK LM_EXCLUDE LM_DESCRIPTION LM_NAME LM_ADDNEW LM_DONTSORT
+     */
+    function __construct($entites,$options=array())
     {
         $this->options = $options;
         $this->HTMLready = true;
@@ -106,6 +113,7 @@ class listMagic
 
         } else
         {
+            $linkarray = array();
             $nolinking = 1;
         }
 
@@ -193,7 +201,7 @@ class listMagic
                 {
                     $data = $entity->{$col['getdatastring']}();
                 }
-                if ($col['type'] == 'TIMESTAMP' && ($data instanceof DateTime))
+                if ($col['type'] == 'TIMESTAMP' && ($data instanceof \DateTime))
                 {
                     $data = $data->format('Y-m-d H:i:s');
                 }

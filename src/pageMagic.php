@@ -72,13 +72,13 @@ class pageMagic
         $options = $names = array();
         $data = array(array('LOGIN', "Login", "VARCHAR"), array('PASSWORD', "Password", "VARCHAR"));
 
-        $map = new Map('Login');
+        $map = new \ajurgensen\phpMagic\map('Login');
         $map->feedArray($data);
         $fm = new formMagic($map, $options, $names);
         if ($fm->entitySaved)
         {
             //Form was returned and server side validated
-            setcookie('pm_session',$this->sessionForUser());
+            setcookie('pm_session',$this->sessionForUser(),null,'/');
             return true;
         }
         else
@@ -88,6 +88,17 @@ class pageMagic
             $this->finalize();
             return false;
         }
+    }
+
+    public function addPanel($text,$title='')
+    {
+        $html = '<div class="panel panel-default">';
+        if ($title)
+        {
+            $html .= '<div class="panel-heading">'. $title .'</div>';
+        }
+        $html .= '<div class="panel-body">' . $text . '</div></div>';
+        $this->addHtml($html);
     }
 
     public function addMenu($menu)
@@ -124,12 +135,12 @@ class pageMagic
         $this->html = '';
         $this->pageTitle = $name;
         $this->sessionFile = '../sessions.txt';
-        $this->secureSite = 0;
+        $this->secureSite = 1;
 
         $this->addBoostrapHeader();
         if (!$this->sessionCheck())
         {
-            die();
+            exit;
         }
     }
 
