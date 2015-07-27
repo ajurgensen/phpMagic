@@ -31,10 +31,28 @@ class map
     var $columns;
     var $name;
     var $staticVars;
+    private $pw_array;
+
+    /**
+     * @param mixed $pw_array
+     */
+    public function setPwArray($pw_array)
+    {
+        $this->pw_array = $pw_array;
+    }
+
+    private function validate_credentials($username,$password)
+    {
+        if (isset($this->pw_array[$username]) && $this->pw_array[$username] == $password)
+        {
+            return true;
+        }
+        return false;
+    }
 
     function validates()
     {
-        if ((isset($this->staticVars['Login']) && isset($this->staticVars['Password'])) && ($this->staticVars['Login'] == 'aj' && $this->staticVars['Password'] == 'nisse'))
+        if ((isset($this->staticVars['Login']) && isset($this->staticVars['Password'])) && $this->validate_credentials($this->staticVars['Login'],$this->staticVars['Password']) )
         {
             return true;
         }

@@ -218,25 +218,30 @@ class listMagic
 
             foreach ($entity->getVirtualColumns() as $key=>$value)
             {
-                if (!isset($headers[$key]))
+                if (isset($this->options['LM_EXCLUDE']) && in_array($key,$this->options['LM_EXCLUDE']))
                 {
-                    if (isset($options['LM_DESCRIPTION'][$key]))
-                    {
-                        $headers[$key] = $options['LM_DESCRIPTION'][$key];
-                    }
-                    else
-                    {
-                        $headers[$key] = $key;
-                    }
-                }
-                if (array_key_exists($key, $linkarray))
-                {
-                    $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
-
+                    //excluded
                 }
                 else
                 {
-                    $fieldarray[] = $value;
+                    if (!isset($headers[$key]))
+                    {
+                        if (isset($options['LM_DESCRIPTION'][$key]))
+                        {
+                            $headers[$key] = $options['LM_DESCRIPTION'][$key];
+                        } else
+                        {
+                            $headers[$key] = $key;
+                        }
+                    }
+                    if (array_key_exists($key, $linkarray))
+                    {
+                        $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
+
+                    } else
+                    {
+                        $fieldarray[] = $value;
+                    }
                 }
 
             }

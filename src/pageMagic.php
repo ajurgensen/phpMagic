@@ -30,9 +30,9 @@ class pageMagic
 {
     private $html;
     private $pageTitle;
-    private $sessionFile;
     private $secureSite;
     public $loginStatus;
+    private $pw_array;
 
     public static function staticTest()
     {
@@ -74,6 +74,7 @@ class pageMagic
 
         $map = new \ajurgensen\phpMagic\map('Login');
         $map->feedArray($data);
+        $map->setPwArray($this->pw_array);
         $fm = new formMagic($map, $options, $names);
         if ($fm->entitySaved)
         {
@@ -130,12 +131,23 @@ class pageMagic
       </nav>');
     }
 
-    function __construct($name='')
+    /**
+     * @param string $name Name of Page
+     * @param array $options Array of options - PM_PWARRAY
+     */
+    function __construct($name='',$options=array())
     {
         $this->html = '';
         $this->pageTitle = $name;
-        $this->sessionFile = '../sessions.txt';
-        $this->secureSite = 1;
+        if (isset($options['PM_PWARRAY']))
+        {
+            $this->pw_array = $options['PM_PWARRAY'];
+            $this->secureSite = 1;
+        }
+        else
+        {
+            $this->secureSite = 0;
+        }
 
         $this->addBoostrapHeader();
         if (!$this->sessionCheck())
