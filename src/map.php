@@ -31,40 +31,27 @@ class map
     var $columns;
     var $name;
     var $staticVars;
-    private $pw_array;
 
     /**
-     * @param mixed $pw_array
+     * @param mixed $name
      */
-    public function setPwArray($pw_array)
+    function validates($name,$value)
     {
-        $this->pw_array = $pw_array;
-    }
-
-    private function validate_credentials($username,$password)
-    {
-        if (isset($this->pw_array[$username]) && $this->pw_array[$username] == $password)
+        if (1==1)
         {
             return true;
         }
-        return false;
-    }
-
-    function validates()
-    {
-        if ((isset($this->staticVars['Login']) && isset($this->staticVars['Password'])) && $this->validate_credentials($this->staticVars['Login'],$this->staticVars['Password']) )
+        elseif ($name == 'name' && $value == 'value')
         {
             return true;
         }
-        elseif (isset($this->staticVars['Login']) && isset($this->staticVars['Password']))
+        else
         {
-            return("Wrong username or passwoth. Or both :)");
-        }else
-        {
-            return true;
+            return "extend class with some logic";
         }
-
     }
+
+    function save(){}
 
     function __call($func, $params)
     {
@@ -73,7 +60,7 @@ class map
             $name = substr($func,3);
             $this->staticVars[$name] = $params[0];
         }
-        $out = $this->validates();
+        $out = $this->validates($name,$params[0]);
         if ($out === true)
         {
             return true;
@@ -97,21 +84,13 @@ class map
         return $this->name;
     }
 
-    /**
-     * @param mixed $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
     function toArray()
     {
         return false;
     }
     function __construct($name)
     {
-        $this->setName($name);
+        $this->name = $name;
         $this->columns = array();
     }
 

@@ -33,6 +33,7 @@ class formMagic
     var $entity;
     var $fromPropel;
     var $passAlongObjects;
+    var $name;
 
     /**
      * @return mixed
@@ -58,51 +59,58 @@ class formMagic
      */
     function __construct($entity, $options,$names,$debug = 0)
     {
+        //Only set this to true once we are validated
         $this->entitySaved = false;
+        $errorsText = '';
 
-        if ($mock = $entity->toArray())
+        if ($entity->toArray())
         {
+            //we are coming from a Propel Object
             $map = $entity::TABLE_MAP;
             $map = $map::getTableMap();
             $this->setFromPropel(1);
         }
         else
         {
+            //We are being build manually
             $this->setFromPropel(0);
             $map = $entity;
         }
+        $this->name = $map->getName();
 
-
-        /*        if (isset($options['objects']))
+        //Check if we are being POSTed to and proccess
+        if (isset($_POST[$this->name . '_posted']) && $_POST[$this->name . '_posted'] == 'true')
+        {
+            if (1==1 || $this->getFromPropel())
+            {
+                $errors = $this->handlePostEntity($entity, $map);
+                if (!count($errors))
                 {
-                    $this->passAlongObjects = $options['objects'];
+                    $entity->save();
+                    $this->handlePostEntityAddons($entity, $map, $options);
+                    $this->entitySaved = true;
+                    $this->entity = $entity;
+                    return true;
                 }
                 else
                 {
-                    $this->passAlongObjects = array();
-                }*/
-
-        if (isset($_POST[$map->getName() . '_posted']) && $_POST[$map->getName() . '_posted'] == 'true')
-        {
-            $errors = $this->proccessPost($entity, $map, $options);
-            if (!count($errors))
-            {
-                $entity->save();
-                $this->proccessAddons($entity, $map, $options);
-                $this->entitySaved = true;
-                $this->entity = $entity;
-                return true;
+                    foreach ($errors as $key => $value)
+                    {
+                        $errorsText .= " " . $value . " ";
+                    }
+                }
             }
         }
 
 
+        //Get name and Desc for the form
         if (isset($options['FM_NAME']))
         {
             $name = $options['FM_NAME'];
         }
         else
         {
-            $name = ucfirst($map->getName());
+            $name = ucfirst($this->name);
         }
 
         if (isset($options['FM_DESC']))
@@ -111,166 +119,21 @@ class formMagic
         }
         else
         {
-            $desc = 'Edit ' . $map->getName();
+            $desc = 'Edit ' . $this->name;
         }
 
+        //Do all the magic stuff
         $html = $this->initForm($name,$desc);
-        foreach ($map->getColumns() as $colum)
+
+        if (1==1 || $this->getFromPropel())
         {
-            //If we have POST data and are here, it's an error situation, use that data and not DB data
-            if (isset($_POST[$colum->getName()]))
-            {
-                $value = $_POST[$colum->getName()];
-            } else
-            {
-                $name = 'get' . $colum->getPhpName();
-                if ($this->getFromPropel())
-                {
-                    $value = $entity->{$name}();
-                }
-                else
-                {$value = '';}
-            }
-            //If we have a Name override use it
-            if (isset($names[$colum->getName()]) && $newname = $names[$colum->getName()])
-            {
-                $colum->setPhpName($newname);
-            }
-            //Ok, start the colunm processing
-            if (isset($options['FM_EXCLUDE']) && in_array($colum->getName(), $options['FM_EXCLUDE']))
-            {
-                //We were blacklisted
-            }
-            elseif (isset($options[$colum->getName()]))
-            {
-                //We are have custom Optionset for this one
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $options[$colum->getName()], $value);
-            }
-            elseif ($this->getFromPropel() && $colum->isForeignKey())
-            {
-                //It's a foreign key - try to do magic!
-                $optionarray = array();
-                $name = 'get' . $colum->getRelatedTableName() . 'sRelatedBy' . $colum->getTableName() . 'Id';
-                try
-                {
-                    $remoteEntities = $entity->{$name}();
-                } catch (\Exception $e)
-                {
 
-                    $name = ucfirst(strtolower($colum->getRelatedTableName())) . "Query::create";
-                    $remoteEntities = call_user_func($name, 'find');
-                }
-
-                if ($remoteEntities)
-                {
-                    foreach ($remoteEntities as $out)
-                    {
-                        $optionarray[$out->getId()] = $out->getName();
-                    }
-                    $colum->setPhpName($colum->getRelatedTableName());
-                    $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
-                }
-            } elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
-            {
-                //We have an email field
-                $html .= $this->addFormInputText($colum, $value, $options, ' type="email" data-parsley-trigger="change" required ');
-            } elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
-            {
-                //We have an PASSWORD field
-                $html .= $this->addFormInputText($colum, $value, $options, ' type="password" data-parsley-trigger="change" required ');
-            } elseif ($colum->getType() == 'VARCHAR')
-            {
-                //normal Varchar
-                $html .= $this->addFormInputText($colum, $value,$options, ' data-parsley-trigger="change" required ');
-            } elseif ($colum->getType() == 'BOOLEAN')
-            {
-                //Boolean
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => 'No', 1 => 'Yes'), $value);
-            } elseif ($debug)
-            {
-                //Give hits in debug mode
-                $html .= $this->addFormElement($colum->getName(), 'Debug - Add ' . $colum->getName());
-            }
+            $html .= $this->buildFormEntity($entity, $options, $names, $debug, $map);
+            $html .= $this->buildFormEntityAddons($entity, $options, $map);
+            $html .= $this->finalizeForm($this->name, $errorsText);
         }
-
-        if (isset($options['FM_ADDONS']))
-        {
-            foreach ($options['FM_ADDONS'] as $addon)
-            {
-                //Image-serviceHasImage-User-125');
-                if (substr_count($addon,'-')== 3)
-                {
-                    list($addon_table, $addon_link, $addon_owner, $addon_owner_id) = explode('-', $addon);
-                    $name = ucfirst(strtolower($addon_table)) . "Query::create";
-                    $remoteEntities = call_user_func($name);
-                    $remoteEntities = $remoteEntities->{"filterBy" . $addon_owner . "Id"}($addon_owner_id)->find();
-
-                }elseif (substr_count($addon,'-')== 1)
-                {
-                    list($addon_table, $addon_link) = explode('-', $addon);
-                    $name = ucfirst(strtolower($addon_table)) . "Query::create";
-                    $remoteEntities = call_user_func($name);
-                    $remoteEntities = $remoteEntities->find();
-                }
-
-                $name = ucfirst(strtolower($addon_table)) . "Query::create";
-                $selectedEntities = call_user_func($name);
-                $selectedEntities = $selectedEntities->{'use' . ucfirst(strtolower($addon_link)) . 'Query'}()->{'filterBy' . $map->getName() . 'Id'}($entity->getId())->endUse()->find();
-
-                $values = array();
-                if ($selectedEntities)
-                {
-                    foreach ($selectedEntities as $out)
-                    {
-                        $values[] = $out->getId();
-                    }
-                }
-
-
-                $optionarray = array();
-                if ($remoteEntities)
-                {
-                    foreach ($remoteEntities as $out)
-                    {
-                        $optionarray[$out->getId()] = $out->getName();
-                    }
-
-                    if (isset($options['FM_DESCRIPTION'][$addon_table]))
-                    {
-                        $name = $options['FM_DESCRIPTION'][$addon_table];
-                    }
-                    else
-                    {
-                        $name = $addon_table;
-                    }
-
-
-                    $html .= $this->addFormMultiSelect($name, $addon_link, $optionarray, $values);
-                }
-            }
-        }
-        $errorsText = '';
-        if (isset($errors))
-        {
-            foreach ($errors as $key => $value)
-            {
-                $errorsText .= " " . $value . " ";
-            }
-        }
-
-        /*            if (count($this->passAlongObjects))
-                    {
-                        $count = 0;
-                        foreach($this->passAlongObjects as $object)
-                        {
-                            $objectName = "Object" . $count;
-                            $serObj = serialize($object);
-                            $html .= "<input type='hidden' value='". $serObj ."' name='" . $objectName . "'>";
-                        }
-                    }*/
-
-        $html .= $this->finalizeForm($map->getName(), $errorsText);
         $this->html = $html;
+
         return true;
     }
 
@@ -299,7 +162,7 @@ class formMagic
     private function initForm($name,$desc)
     {
         $html = '<div class="panel panel-default">';
-        $html .= '<div class="panel-heading"><h3>' . $name . '</h3></div>';
+        $html .= '<div class="panel-heading"><strong>' . $name . '</strong></div>';
         $html .= '<div class="panel-body"><p>' . $desc . '</p></div>';
         $html .= '<ul class="list-group">';
         $html .= '<form method="post">';
@@ -425,7 +288,7 @@ class formMagic
      * @param $entity
      * @param $map
      */
-    private function proccessPost(&$entity, $map,$options)
+    private function handlePostEntity(&$entity, $map)
     {
         if (session_status() == PHP_SESSION_NONE)
         {
@@ -458,6 +321,11 @@ class formMagic
                     {
                         $name = 'set' . $colum->getPhpName();
                         $result = $entity->{$name}($value);
+                        if ($result !== true)
+                        {
+                            $errors[$colum->getPhpName()] = $result;
+                        }
+
                     } elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
                     {
                         $name = 'set' . $colum->getPhpName();
@@ -479,7 +347,7 @@ class formMagic
         }
         return($errors);
     }
-    private function proccessAddons(&$entity, $map,$options)
+    private function handlePostEntityAddons(&$entity, $map,$options)
     {
         if (isset($options['FM_ADDONS']))
         {
@@ -508,5 +376,167 @@ class formMagic
                 }
             }
         }
+    }
+
+    /**
+     * @param $entity
+     * @param $options
+     * @param $map
+     * @param $html
+     * @return string
+     */
+    private function buildFormEntityAddons($entity, $options, $map)
+    {
+        $html = '';
+        if (isset($options['FM_ADDONS']))
+        {
+            foreach ($options['FM_ADDONS'] as $addon)
+            {
+                //Image-serviceHasImage-User-125');
+                if (substr_count($addon, '-') == 3)
+                {
+                    list($addon_table, $addon_link, $addon_owner, $addon_owner_id) = explode('-', $addon);
+                    $name = ucfirst(strtolower($addon_table)) . "Query::create";
+                    $remoteEntities = call_user_func($name);
+                    $remoteEntities = $remoteEntities->{"filterBy" . $addon_owner . "Id"}($addon_owner_id)->find();
+
+                } elseif (substr_count($addon, '-') == 1)
+                {
+                    list($addon_table, $addon_link) = explode('-', $addon);
+                    $name = ucfirst(strtolower($addon_table)) . "Query::create";
+                    $remoteEntities = call_user_func($name);
+                    $remoteEntities = $remoteEntities->find();
+                }
+
+                $name = ucfirst(strtolower($addon_table)) . "Query::create";
+                $selectedEntities = call_user_func($name);
+                $selectedEntities = $selectedEntities->{'use' . ucfirst(strtolower($addon_link)) . 'Query'}()->{'filterBy' . $map->getName() . 'Id'}($entity->getId())->endUse()->find();
+
+                $values = array();
+                if ($selectedEntities)
+                {
+                    foreach ($selectedEntities as $out)
+                    {
+                        $values[] = $out->getId();
+                    }
+                }
+
+
+                $optionarray = array();
+                if ($remoteEntities)
+                {
+                    foreach ($remoteEntities as $out)
+                    {
+                        $optionarray[$out->getId()] = $out->getName();
+                    }
+
+                    if (isset($options['FM_DESCRIPTION'][$addon_table]))
+                    {
+                        $name = $options['FM_DESCRIPTION'][$addon_table];
+                    } else
+                    {
+                        $name = $addon_table;
+                    }
+
+
+                    $html .= $this->addFormMultiSelect($name, $addon_link, $optionarray, $values);
+                }
+            }
+            return $html;
+        }
+        return $html;
+    }
+
+    /**
+     * @param $entity
+     * @param $options
+     * @param $names
+     * @param $debug
+     * @param $map
+     * @param $html
+     * @return string HTML
+     */
+    private function buildFormEntity($entity, $options, $names, $debug, $map)
+    {
+        $html = '';
+        foreach ($map->getColumns() as $colum)
+        {
+            //If we have POST data and are here, it's an error situation, use that data and not DB data
+            if (isset($_POST[$colum->getName()]))
+            {
+                $value = $_POST[$colum->getName()];
+            } else
+            {
+                $name = 'get' . $colum->getPhpName();
+                if ($this->getFromPropel())
+                {
+                    $value = $entity->{$name}();
+                } else
+                {
+                    $value = '';
+                }
+            }
+            //If we have a Name override use it
+            if (isset($names[$colum->getName()]) && $newname = $names[$colum->getName()])
+            {
+                $colum->setPhpName($newname);
+            }
+            //Ok, start the colunm processing
+            if (isset($options['FM_EXCLUDE']) && in_array($colum->getName(), $options['FM_EXCLUDE']))
+            {
+                //We were blacklisted
+            } elseif (isset($options[$colum->getName()]))
+            {
+                //We are have custom Optionset for this one
+                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $options[$colum->getName()], $value);
+            } elseif ($this->getFromPropel() && $colum->isForeignKey())
+            {
+                //It's a foreign key - try to do magic!
+                $optionarray = array();
+                $name = 'get' . $colum->getRelatedTableName() . 'sRelatedBy' . $colum->getTableName() . 'Id';
+                try
+                {
+                    $remoteEntities = $entity->{$name}();
+                    return $html;
+                } catch (\Exception $e)
+                {
+
+                    $name = ucfirst(strtolower($colum->getRelatedTableName())) . "Query::create";
+                    $remoteEntities = call_user_func($name, 'find');
+                }
+                return $html;
+
+                if ($remoteEntities)
+                {
+                    foreach ($remoteEntities as $out)
+                    {
+                        $optionarray[$out->getId()] = $out->getName();
+                    }
+                    $colum->setPhpName($colum->getRelatedTableName());
+                    $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
+                }
+            } elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
+            {
+                //We have an email field
+                $html .= $this->addFormInputText($colum, $value, $options, ' type="email" data-parsley-trigger="change" required ');
+            } elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
+            {
+                //We have an PASSWORD field
+                $html .= $this->addFormInputText($colum, $value, $options, ' type="password" data-parsley-trigger="change" required ');
+            } elseif ($colum->getType() == 'VARCHAR')
+            {
+                //normal Varchar
+                $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" required ');
+            } elseif ($colum->getType() == 'BOOLEAN')
+            {
+                //Boolean
+                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => 'No', 1 => 'Yes'), $value);
+            } elseif ($debug)
+            {
+                //Give hits in debug mode
+                $html .= $this->addFormElement($colum->getName(), 'Debug - Add ' . $colum->getName());
+            }
+        }
+        return $html;
     }
 }
