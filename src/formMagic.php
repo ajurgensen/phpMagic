@@ -186,8 +186,13 @@ class formMagic
         $html = "<input type='hidden' value='true' name='" . $name . '_posted' . "'>";
         $html .= "<input type='hidden' value='". $rnd ."' name='" . $name . '_key' . "'>";
         $html .= '<li class="list-group-item">';
-        $html .= "<input type='submit' value='Send' class='btn btn-default pull-right'> &nbsp;";
-        $html .= '<input type="button" value="Back" class="btn btn-default pull-right" onclick="window.history.back()" />  &nbsp;';
+        $html .= "&nbsp";
+        $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
+        $html .= "<input type='submit' value='Send' class='btn btn-success '> &nbsp;";
+        $html .= '</div>';
+        $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
+        $html .= '<input type="button" value="Back" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
+        $html .= '</div>';
         $html .= '</li>';
         if ($error)
         {
