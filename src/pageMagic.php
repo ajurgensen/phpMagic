@@ -30,7 +30,6 @@ class pageMagic
 {
     private $html;
     private $pageTitle;
-    private $secureSite;
     public $loginStatus;
     private $pw_array;
 
@@ -46,11 +45,6 @@ class pageMagic
 
     private function sessionCheck()
     {
-        if (!$this->secureSite)
-        {
-            return true;
-        }
-
         if (isset($_COOKIE['pm_session']) && $_COOKIE['pm_session'] == $this->sessionForUser())
         {
             return true;
@@ -131,25 +125,22 @@ class pageMagic
       </nav>');
     }
 
-    function __construct($name='',$options=array())
-    {
-        $this->html = '';
-        $this->pageTitle = $name;
-        if (isset($options['PM_PWARRAY']))
-        {
-            $this->pw_array = $options['PM_PWARRAY'];
-            $this->secureSite = 1;
-        }
-        else
-        {
-            $this->secureSite = 0;
-        }
 
-        $this->addBoostrapHeader();
+    public function addPWArray($array)
+    {
+        $this->pw_array = $array;
         if (!$this->sessionCheck())
         {
             exit;
         }
+
+    }
+
+    function __construct($name='')
+    {
+        $this->html = '';
+        $this->pageTitle = $name;
+        $this->addBoostrapHeader();
     }
 
     public function finalize()
