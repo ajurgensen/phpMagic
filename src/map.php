@@ -31,6 +31,24 @@ class map
     var $columns;
     var $name;
     var $staticVars;
+    private $pw_array;
+
+    /**
+     * @param mixed $pw_array
+     */
+    public function setPwArray($pw_array)
+    {
+        $this->pw_array = $pw_array;
+    }
+
+    private function validate_credentials($username,$password)
+    {
+        if (isset($this->pw_array[$username]) && $this->pw_array[$username] == $password)
+        {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @param mixed $name
