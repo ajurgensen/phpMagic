@@ -529,7 +529,11 @@ class formMagic
             } elseif ($colum->getType() == 'VARCHAR')
             {
                 //normal Varchar
-                $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" required ');
+                $require = '';
+                if ($this->fromPropel && $colum->isNotNull())
+                {$require = 'required';}
+
+                $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" '. $require .' ');
             } elseif ($colum->getType() == 'BOOLEAN')
             {
                 //Boolean
