@@ -193,8 +193,10 @@ class listMagic
                     $remote_id = $entity->{$col['getdatastring']}();
                     $remoteQueryName = ucfirst(strtolower($col['remoteTableName'])) . "Query::create";
                     $remoteQuery = call_user_func($remoteQueryName);
-                    $remoteEntity = $remoteQuery->findOneById($remote_id);
-                    $data = $remoteEntity->getName();
+                    if ($remoteEntity = $remoteQuery->findOneById($remote_id))
+                    {
+                         $data = $remoteEntity->getName();^
+                    }
 
                 }
                 else
