@@ -195,7 +195,7 @@ class listMagic
                     $remoteQuery = call_user_func($remoteQueryName);
                     if ($remoteEntity = $remoteQuery->findOneById($remote_id))
                     {
-                         $data = $remoteEntity->getName();^
+                         $data = $remoteEntity->getName();
                     }
 
                 }

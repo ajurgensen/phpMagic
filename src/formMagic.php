@@ -327,10 +327,10 @@ class formMagic
                         $name = 'set' . $colum->getPhpName();
                         try
                         {
-                            $entity->{$name}($value);^M
-                        } catch (\Exception $e)^M
+                            $entity->{$name}($value);
+                        } catch (\Exception $e)
                         {
-                            $errors[$colum->getPhpName()] = "Unable to update " . $colum->getPhpName();^M
+                            $errors[$colum->getPhpName()] = "Unable to update " . $colum->getPhpName();
                          }
                     } elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
                     {
