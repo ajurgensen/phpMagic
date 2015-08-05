@@ -503,15 +503,12 @@ class formMagic
                 try
                 {
                     $remoteEntities = $entity->{$name}();
-                    return $html;
                 } catch (\Exception $e)
                 {
 
                     $name = ucfirst(strtolower($colum->getRelatedTableName())) . "Query::create";
                     $remoteEntities = call_user_func($name, 'find');
                 }
-                return $html;
-
                 if ($remoteEntities)
                 {
                     foreach ($remoteEntities as $out)
