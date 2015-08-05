@@ -30,7 +30,6 @@ class pageMagic
 {
     private $html;
     private $pageTitle;
-    private $secureSite;
     public $loginStatus;
     private $pw_array;
 
@@ -46,11 +45,6 @@ class pageMagic
 
     private function sessionCheck()
     {
-        if (!$this->secureSite)
-        {
-            return true;
-        }
-
         if (isset($_COOKIE['pm_session']) && $_COOKIE['pm_session'] == $this->sessionForUser())
         {
             return true;
@@ -64,7 +58,7 @@ class pageMagic
 
     private function sessionForUser()
     {
-        return md5($_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['HTTP_HOST'] );
+        return md5($_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['HTTP_HOST'] . $_SERVER['DOCUMENT_ROOT'] . $_SERVER['SERVER_ADMIN']);
     }
 
     private function doLogin()
@@ -91,7 +85,8 @@ class pageMagic
         }
     }
 
-    public function addPanel($text,$title='')
+
+    public function getPanel($text,$title='')
     {
         $html = '<div class="panel panel-default">';
         if ($title)
@@ -99,7 +94,13 @@ class pageMagic
             $html .= '<div class="panel-heading">'. $title .'</div>';
         }
         $html .= '<div class="panel-body">' . $text . '</div></div>';
-        $this->addHtml($html);
+        return($html);
+    }
+
+
+    public function addPanel($text,$title='')
+    {
+        $this->addHtml($this->getPanel($text,$title));
     }
 
     public function addMenu($menu)
@@ -131,25 +132,20 @@ class pageMagic
       </nav>');
     }
 
-    function __construct($name='',$options=array())
+    public function addPWArray($array)
     {
-        $this->html = '';
-        $this->pageTitle = $name;
-        if (isset($options['PM_PWARRAY']))
-        {
-            $this->pw_array = $options['PM_PWARRAY'];
-            $this->secureSite = 1;
-        }
-        else
-        {
-            $this->secureSite = 0;
-        }
-
-        $this->addBoostrapHeader();
+        $this->pw_array = $array;
         if (!$this->sessionCheck())
         {
             exit;
         }
+    }
+
+    function __construct($name='')
+    {
+        $this->html = '';
+        $this->pageTitle = $name;
+        $this->addBoostrapHeader();
     }
 
     public function finalize()

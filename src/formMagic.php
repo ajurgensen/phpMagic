@@ -325,13 +325,10 @@ class formMagic
                     } elseif ($colum->getType() == 'VARCHAR' && strlen($value) <= $colum->getSize() && is_string($value))
                     {
                         $name = 'set' . $colum->getPhpName();
-
-                        try
+                        $result = $entity->{$name}($value);
+                        if ($result !== true)
                         {
-                            $entity->{$name}($value);
-                        } catch (\Exception $e)
-                        {
-                            $errors[$colum->getPhpName()] = "Unable to update " . $colum->getPhpName();
+                            $errors[$colum->getPhpName()] = $result;
                         }
 
                     } elseif ($colum->getType() == 'INTEGER' && is_numeric($value))

@@ -99,7 +99,7 @@ class listMagic
         {
             $map = $entity::TABLE_MAP;
             $map = $map::getTableMap();
-            if ($mock = $entity->toArray())
+            if ($entity->toArray())
             {
                 $this->setFromPropel(1);
             }
@@ -189,13 +189,13 @@ class listMagic
                 }
                 if ($col['type'] == 'REMOTENAME')
                 {
-                        $remote_id = $entity->{$col['getdatastring']}();
-                        $remoteQueryName = ucfirst(strtolower($col['remoteTableName'])) . "Query::create";
-                        $remoteQuery = call_user_func($remoteQueryName);
-                        if ($remoteEntity = $remoteQuery->findOneById($remote_id))
-                        {
-                            $data = $remoteEntity->getName();
-                        }
+
+                    $remote_id = $entity->{$col['getdatastring']}();
+                    $remoteQueryName = ucfirst(strtolower($col['remoteTableName'])) . "Query::create";
+                    $remoteQuery = call_user_func($remoteQueryName);
+                    $remoteEntity = $remoteQuery->findOneById($remote_id);
+                    $data = $remoteEntity->getName();
+
                 }
                 else
                 {
