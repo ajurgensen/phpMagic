@@ -121,6 +121,22 @@ class listMagic
             $nolinking = 1;
         }
 
+        //Image col
+        if (isset($this->options['LM_IMAGE']))
+        {
+            $imageColName = $this->options['LM_IMAGE'];
+            $cols[$imageColName]['headername'] = $imageColName;
+            $cols[$imageColName]['getdatastring'] = $this->propelFormatColName($imageColName);
+            if (array_key_exists($imageColName, $linkarray))
+            {
+                $cols[$imageColName]['type'] = 'IMAGELINK';
+                $cols[$imageColName]['link'] = $linkarray[$imageColName];
+            }
+            else
+            {
+                $cols[$imageColName]['type'] = 'IMAGE';
+            }
+        }
 
         //First loop, build structure
         if (isset($map))
@@ -201,7 +217,15 @@ class listMagic
                     {
                         $data = $remoteEntity->getName();
                     }
+                }
+                elseif($col['type'] == 'IMAGE')
+                {
+                    $data = '<a href="#" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
 
+                }
+                elseif($col['type'] == 'IMAGELINK')
+                {
+                    $data = '<a href="'.$entity->{$col['link']}.'" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
                 }
                 else
                 {
