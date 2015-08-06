@@ -32,6 +32,8 @@ class pageMagic
     private $pageTitle;
     public $loginStatus;
     private $pw_array;
+    private $uploadedFile;
+    private $uploadHandled;
 
     public static function staticTest()
     {
@@ -58,7 +60,58 @@ class pageMagic
 
     private function sessionForUser()
     {
-        return md5($_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['HTTP_HOST'] . $_SERVER['DOCUMENT_ROOT'] . $_SERVER['SERVER_ADMIN']);
+        return md5($_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['HTTP_HOST'] );
+    }
+
+
+    public function addFileUploader($title='')
+    {
+        $html =
+'<form method="post" enctype="multipart/form-data" name="fileUploadForm">
+<input id="input-4" type="file" multiple=true class="file-loading" name="uploadFile">
+<script>
+$(document).on(\'ready\', function() {
+    $("#input-4").fileinput({showCaption: false});
+});
+</script>
+</form>';
+        $this->addPanel($html,$title);
+    }
+
+    public function getUploadedFile()
+    {
+        return $this->uploadedFile;
+    }
+
+    private function handleFileUpload()
+    {
+        if (isset($_FILES['uploadFile']))
+        {
+            $this->uploadedFile = $_FILES['uploadFile'];
+        }
+        $this->uploadHandled = true;
+    }
+
+    public function fileUploaded()
+    {
+        if (!$this->uploadHandled)
+        {
+            $this->handleFileUpload();
+        }
+        if ($this->uploadedFile)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public function addImage($image)
+    {
+        $html = '<img src="'.$image.'">';
+        $this->addPanel($html);
     }
 
     private function doLogin()
@@ -85,8 +138,7 @@ class pageMagic
         }
     }
 
-
-    public function getPanel($text,$title='')
+    public function addPanel($text,$title='')
     {
         $html = '<div class="panel panel-default">';
         if ($title)
@@ -94,13 +146,7 @@ class pageMagic
             $html .= '<div class="panel-heading">'. $title .'</div>';
         }
         $html .= '<div class="panel-body">' . $text . '</div></div>';
-        return($html);
-    }
-
-
-    public function addPanel($text,$title='')
-    {
-        $this->addHtml($this->getPanel($text,$title));
+        $this->addHtml($html);
     }
 
     public function addMenu($menu)
@@ -132,6 +178,7 @@ class pageMagic
       </nav>');
     }
 
+
     public function addPWArray($array)
     {
         $this->pw_array = $array;
@@ -139,11 +186,14 @@ class pageMagic
         {
             exit;
         }
+
     }
 
     function __construct($name='')
     {
         $this->html = '';
+        $this->uploadHandled = false;
+        $this->uploadedFile = false;
         $this->pageTitle = $name;
         $this->addBoostrapHeader();
     }
@@ -184,10 +234,12 @@ class pageMagic
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="/js/fileinput.min.js"></script>
     <title>' .  $this->pageTitle .'</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/fileinput.min.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>

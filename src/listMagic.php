@@ -91,7 +91,11 @@ class listMagic
 
         } else
         {
-            $entity = $entites[0];
+            foreach ($entites as $first_ob)
+            {
+                $entity = $first_ob;
+                break;
+            }
         }
 
         $nolinking = 0;
@@ -195,7 +199,7 @@ class listMagic
                     $remoteQuery = call_user_func($remoteQueryName);
                     if ($remoteEntity = $remoteQuery->findOneById($remote_id))
                     {
-                         $data = $remoteEntity->getName();
+                        $data = $remoteEntity->getName();
                     }
 
                 }
