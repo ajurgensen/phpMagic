@@ -343,10 +343,21 @@ class listMagic
         {
             $sortable = 'sortable';
         }
+        if (isset($this->options['LM_SEARCH']))
+        {
+            $search2 = $this->options['LM_SEARCH'] .' ';
+            $search1 = '<input type="search" class="light-table-filter" data-table="'.$search2.'" placeholder="Quick Filter">';
+        }
+        else
+        {
+            $search1 = '';
+            $search2 = '';
+        }
         $this->addHTML('<div class="panel panel-default">
 <div class="panel-heading"><h3 class="panel-title">' . $title. '</h3></div>
-<div class="panel-body">
-<table class="col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">'
+<div class="panel-body">'
+. $search1 .
+'<table class="'.$search2.'col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">'
         );
     }
 

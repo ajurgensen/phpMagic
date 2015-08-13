@@ -83,6 +83,13 @@ $(document).on(\'ready\', function() {
         return $this->uploadedFile;
     }
 
+    public function includeJSfile($jsFile)
+    {
+        $string = '<script language="javascript" type="text/javascript" src="'.$jsFile.'">';
+        $this->addHtml($string);
+        return;
+    }
+
     private function handleFileUpload()
     {
         if (isset($_FILES['uploadFile']))
@@ -219,6 +226,7 @@ $(document).on(\'ready\', function() {
         $this->addHtml('    </div>
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/tableSort.js"></script>
+<script src="/js/tablesearch.js"></script>
 </body>
 </html>
 ');
