@@ -33,6 +33,7 @@ class pageMagic
     public $loginStatus;
     private $pw_array;
     private $uploadedFile;
+    private $defaultInitiate;
     private $uploadHandled;
 
     public static function staticTest()
@@ -40,10 +41,11 @@ class pageMagic
         return 'Hello World, Composer!';
     }
 
-    private function getHTML()
+    public function getHTML()
     {
         return($this->html);
     }
+
 
     private function sessionCheck()
     {
@@ -145,7 +147,7 @@ $(document).on(\'ready\', function() {
         }
     }
 
-    public function addPanel($text,$title='')
+    public function getPanel($text,$title='')
     {
         $html = '<div class="panel panel-default">';
         if ($title)
@@ -153,7 +155,13 @@ $(document).on(\'ready\', function() {
             $html .= '<div class="panel-heading">'. $title .'</div>';
         }
         $html .= '<div class="panel-body">' . $text . '</div></div>';
-        $this->addHtml($html);
+        return($html);
+    }
+
+
+    public function addPanel($text,$title='')
+    {
+        $this->addHtml($this->getPanel($text,$title));
     }
 
     public function addMenu($menu)
@@ -196,13 +204,17 @@ $(document).on(\'ready\', function() {
 
     }
 
-    function __construct($name='')
+    function __construct($name='',$defaultInitiate = 1)
     {
         $this->html = '';
         $this->uploadHandled = false;
         $this->uploadedFile = false;
         $this->pageTitle = $name;
-        $this->addBoostrapHeader();
+        $this->defaultInitiate = $defaultInitiate;
+        if ($this->defaultInitiate)
+        {
+            $this->addBoostrapHeader();
+        }
     }
 
     public function finalize()
