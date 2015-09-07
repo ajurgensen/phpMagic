@@ -34,6 +34,7 @@ class formMagic
     var $fromPropel;
     var $passAlongObjects;
     var $name;
+    var $names;
 
     /**
      * @return mixed
@@ -62,6 +63,7 @@ class formMagic
         //Only set this to true once we are validated
         $this->entitySaved = false;
         $errorsText = '';
+        $this->names = $names;
 
         if ($entity->toArray())
         {
@@ -436,9 +438,9 @@ class formMagic
                         $optionarray[$out->getId()] = $out->getName();
                     }
 
-                    if (isset($options['FM_DESCRIPTION'][$addon_table]))
+                    if (isset($this->names[$addon_table]))
                     {
-                        $name = $options['FM_DESCRIPTION'][$addon_table];
+                        $name = $this->names[$addon_table];
                     } else
                     {
                         $name = $addon_table;
@@ -515,9 +517,13 @@ class formMagic
                     {
                         $optionarray[$out->getId()] = $out->getName();
                     }
-                    $colum->setPhpName($colum->getRelatedTableName());
-                    $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
+                    if (!isset($newname))
+                    {
+                        $colum->setPhpName($colum->getRelatedTableName());
+                    }
                 }
+                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
+
             } elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
             {
                 //We have an email field
