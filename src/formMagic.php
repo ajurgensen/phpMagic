@@ -80,7 +80,7 @@ class formMagic
             $this->setFromPropel(0);
             $map = $entity;
         }
-        $this->name = $map->getName();
+        $this->name = $map->getName() . $entity->getId();
 
         //Check if we are being POSTed to and proccess
         if (isset($_POST[$this->name . '_posted']) && $_POST[$this->name . '_posted'] == 'true')
