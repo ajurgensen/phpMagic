@@ -36,6 +36,7 @@ class formMagic
     var $name;
     var $names;
 
+
     /**
      * @return mixed
      */
@@ -64,6 +65,7 @@ class formMagic
         $this->entitySaved = false;
         $errorsText = '';
         $this->names = $names;
+        $this->options = $options;
 
         if ($entity->toArray())
         {
@@ -146,9 +148,17 @@ class formMagic
      */
     private function addFormElement($name,$formElement)
     {
+        if (isset($this->options['FM_OPTIONS']['autotranslate']))
+        {
+            $nicename = translate('FM_' . $name);
+        }
+        else
+        {
+            $nicename = $name;
+        }
         $html = '<li class="list-group-item"><div class="row">';
         $html .= '<div class="col-xs-5">';
-        $html .= '<label for="' . $name . '">' . $name . ":</label>";
+        $html .= '<label for="' . $name . '">' . $nicename . ":</label>";
         $html .= '</div>';
         $html .= '<div class="col-xs-7">';
         $html .= $formElement;
@@ -489,15 +499,18 @@ class formMagic
             {
                 $colum->setPhpName($newname);
             }
+
             //Ok, start the colunm processing
             if (isset($options['FM_EXCLUDE']) && in_array($colum->getName(), $options['FM_EXCLUDE']))
             {
                 //We were blacklisted
-            } elseif (isset($options[$colum->getName()]))
+            }
+            elseif (isset($options[$colum->getName()]))
             {
                 //We are have custom Optionset for this one
                 $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $options[$colum->getName()], $value);
-            } elseif ($this->getFromPropel() && $colum->isForeignKey())
+            }
+            elseif ($this->getFromPropel() && $colum->isForeignKey())
             {
                 //It's a foreign key - try to do magic!
                 $optionarray = array();
@@ -505,9 +518,9 @@ class formMagic
                 try
                 {
                     $remoteEntities = $entity->{$name}();
-                } catch (\Exception $e)
+                }
+                catch (\Exception $e)
                 {
-
                     $name = ucfirst(strtolower($colum->getRelatedTableName())) . "Query::create";
                     $remoteEntities = call_user_func($name, 'find');
                 }
@@ -523,16 +536,18 @@ class formMagic
                     }
                 }
                 $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
-
-            } elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
+            }
+            elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
             {
                 //We have an email field
                 $html .= $this->addFormInputText($colum, $value, $options, ' type="email" data-parsley-trigger="change" required ');
-            } elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
+            }
+            elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
             {
                 //We have an PASSWORD field
                 $html .= $this->addFormInputText($colum, $value, $options, ' type="password" data-parsley-trigger="change" required ');
-            } elseif ($colum->getType() == 'VARCHAR')
+            }
+            elseif ($colum->getType() == 'VARCHAR')
             {
                 //normal Varchar
                 $require = '';
@@ -540,11 +555,13 @@ class formMagic
                 {$require = 'required';}
 
                 $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" '. $require .' ');
-            } elseif ($colum->getType() == 'BOOLEAN')
+            }
+            elseif ($colum->getType() == 'BOOLEAN')
             {
                 //Boolean
                 $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => 'No', 1 => 'Yes'), $value);
-            } elseif ($debug)
+            }
+            elseif ($debug)
             {
                 //Give hits in debug mode
                 $html .= $this->addFormElement($colum->getName(), 'Debug - Add ' . $colum->getName());
