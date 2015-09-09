@@ -311,7 +311,7 @@ class formMagic
         {
             session_start();
         }
-        if ($_POST[$map->getName() . '_key'] !== $_SESSION[$map->getName()])
+        if ((isset($_POST[$map->getName() . '_key']))&&($_POST[$map->getName() . '_key'] !== $_SESSION[$map->getName()]))
         {
             return (array('General' => "Don't Cheat"));
         }
