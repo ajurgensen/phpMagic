@@ -35,6 +35,9 @@ class formMagic
     var $passAlongObjects;
     var $name;
     var $names;
+    var $formNiceName;
+    var $formName;
+    var $formDesc;
 
 
     /**
@@ -52,6 +55,13 @@ class formMagic
     {
         $this->fromPropel = $fromPropel;
     }
+
+    function cleanString($string) {
+        $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
+
+        return preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
+    }
+
 
     /**
      * @param Array $entity Entity to build form from
@@ -80,10 +90,34 @@ class formMagic
             $this->setFromPropel(0);
             $map = $entity;
         }
-        $this->name = $map->getName() . $entity->getId();
+
+        //Get name, nicename and Desc for the form
+        if (isset($options['FM_NAME']))
+        {
+            $this->formNiceName =$options['FM_NAME'];
+        }
+        elseif ($this->fromPropel)
+        {
+            $this->formNiceName =$entity->getName();
+        }
+        else
+        {
+            $this->formNiceName = "form";
+        }
+
+        $this->formName= $this->cleanString($this->formNiceName);
+
+        if (isset($options['FM_DESC']))
+        {
+            $this->formDesc = $options['FM_DESC'];
+        }
+        else
+        {
+            $this->formDesc = $this->formNiceName;
+        }
 
         //Check if we are being POSTed to and proccess
-        if (isset($_POST[$this->name . '_posted']) && $_POST[$this->name . '_posted'] == 'true')
+        if (isset($_POST[$this->formName . '_posted']) && $_POST[$this->formName . '_posted'] == 'true')
         {
             if (1==1 || $this->getFromPropel())
             {
@@ -106,35 +140,14 @@ class formMagic
             }
         }
 
-
-        //Get name and Desc for the form
-        if (isset($options['FM_NAME']))
-        {
-            $name = $options['FM_NAME'];
-        }
-        else
-        {
-            $name = ucfirst($this->name);
-        }
-
-        if (isset($options['FM_DESC']))
-        {
-            $desc = $options['FM_DESC'];
-        }
-        else
-        {
-            $desc = 'Edit ' . $this->name;
-        }
-
         //Do all the magic stuff
-        $html = $this->initForm($name,$desc);
+        $html = $this->initForm();
 
         if (1==1 || $this->getFromPropel())
         {
-
             $html .= $this->buildFormEntity($entity, $options, $names, $debug, $map);
             $html .= $this->buildFormEntityAddons($entity, $options, $map);
-            $html .= $this->finalizeForm($this->name, $errorsText);
+            $html .= $this->finalizeForm($errorsText);
         }
         $this->html = $html;
 
@@ -171,11 +184,11 @@ class formMagic
      * @param $map
      * @return string
      */
-    private function initForm($name,$desc)
+    private function initForm()
     {
         $html = '<div class="panel panel-default">';
-        $html .= '<div class="panel-heading"><strong>' . $name . '</strong></div>';
-        $html .= '<div class="panel-body"><p>' . $desc . '</p></div>';
+        $html .= '<div class="panel-heading"><strong>' . $this->formNiceName. '</strong></div>';
+        $html .= '<div class="panel-body"><p>' . $this->formDesc . '</p></div>';
         $html .= '<ul class="list-group">';
         $html .= '<form method="post">';
         $html .= '<div class="form-group">';
@@ -186,17 +199,17 @@ class formMagic
      * @param $map
      * @param $html
      */
-    private function finalizeForm($name,$error='')
+    private function finalizeForm($error='')
     {
         if (session_status() == PHP_SESSION_NONE)
         {
             session_start();
         }
-        $rnd = md5($name . rand(0,1000000000000000000000));
-        $_SESSION[$name] = $rnd;
+        $rnd = md5($this->formName . rand(0,1000000000000000000000));
+        $_SESSION[$this->formName] = $rnd;
 
-        $html = "<input type='hidden' value='true' name='" . $name . '_posted' . "'>";
-        $html .= "<input type='hidden' value='". $rnd ."' name='" . $name . '_key' . "'>";
+        $html = "<input type='hidden' value='true' name='" . $this->formName . '_posted' . "'>";
+        $html .= "<input type='hidden' value='". $rnd ."' name='" . $this->formName . '_key' . "'>";
         $html .= '<li class="list-group-item">';
         $html .= "&nbsp";
         $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
