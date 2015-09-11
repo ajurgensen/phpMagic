@@ -79,7 +79,7 @@ class listMagic
      * @param Array $entites Collection of entities to be listed. Could be a list of Propel Objects
      * @param Array $options LM_LINK LM_EXCLUDE LM_DESCRIPTION LM_NAME LM_ADDNEW LM_DONTSORT
      */
-    function __construct($entites,$options=array())
+    function __construct($entites=array(),$options=array())
     {
         $this->options = $options;
         $this->HTMLready = true;
@@ -88,7 +88,7 @@ class listMagic
         $cols = array();
         if (!count($entites))
         {
-
+            return;
         } else
         {
             foreach ($entites as $first_ob)
@@ -120,6 +120,7 @@ class listMagic
             $linkarray = array();
             $nolinking = 1;
         }
+
 
         //Image col
         if (isset($this->options['LM_IMAGE']))
@@ -201,8 +202,7 @@ class listMagic
                     if (isset($options['LM_DESCRIPTION'][$col['headername']]))
                     {
                         $headers[$col['headername']] = $options['LM_DESCRIPTION'][$col['headername']];
-                    }
-                    else
+                    } else
                     {
                         $headers[$col['headername']] = $col['headername'];
                     }
@@ -217,17 +217,14 @@ class listMagic
                     {
                         $data = $remoteEntity->getName();
                     }
-                }
-                elseif($col['type'] == 'IMAGE')
+                } elseif ($col['type'] == 'IMAGE')
                 {
                     $data = '<a href="#" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
 
-                }
-                elseif($col['type'] == 'IMAGELINK')
+                } elseif ($col['type'] == 'IMAGELINK')
                 {
-                    $data = '<a href="'.$entity->{$col['link']}.'" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
-                }
-                else
+                    $data = '<a href="' . $entity->{$col['link']} . '" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
+                } else
                 {
                     $data = $entity->{$col['getdatastring']}();
                 }
@@ -246,37 +243,39 @@ class listMagic
                 $fieldarray[] = $data;
             }
 
-            foreach ($entity->getVirtualColumns() as $key=>$value)
+            if ($this->fromPropel)
             {
-                if (isset($this->options['LM_EXCLUDE']) && in_array($key,$this->options['LM_EXCLUDE']))
+                foreach ($entity->getVirtualColumns() as $key => $value)
                 {
-                    //excluded
-                }
-                else
-                {
-                    if (!isset($headers[$key]))
+                    if (isset($this->options['LM_EXCLUDE']) && in_array($key, $this->options['LM_EXCLUDE']))
                     {
-                        if (isset($options['LM_DESCRIPTION'][$key]))
-                        {
-                            $headers[$key] = $options['LM_DESCRIPTION'][$key];
-                        } else
-                        {
-                            $headers[$key] = $key;
-                        }
-                    }
-                    if (array_key_exists($key, $linkarray))
-                    {
-                        $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
-
+                        //excluded
                     } else
                     {
-                        $fieldarray[] = $value;
+                        if (!isset($headers[$key]))
+                        {
+                            if (isset($options['LM_DESCRIPTION'][$key]))
+                            {
+                                $headers[$key] = $options['LM_DESCRIPTION'][$key];
+                            } else
+                            {
+                                $headers[$key] = $key;
+                            }
+                        }
+                        if (array_key_exists($key, $linkarray))
+                        {
+                            $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
+
+                        } else
+                        {
+                            $fieldarray[] = $value;
+                        }
                     }
+
                 }
 
+                $dataarray[] = $fieldarray;
             }
-
-            $dataarray[] = $fieldarray;
         }
 
 
@@ -292,35 +291,13 @@ class listMagic
         {
             $name = '';
         }
-            //Third loop, build HTML from objects
-            $this->initHTML($name);
+        //Third loop, build HTML from objects
+        $this->initHTML($name);
 
-        $this->addHTML('<thead class="cf"><tr>');
-
-        foreach ($headers as $header)
-        {
-            $this->addHTML('<th>' . $header . '</th>');
-        }
-
-        $this->addHTML('</thead></tr>');
+        $this->addHeaders($headers);
 
 
-        foreach ($dataarray as $fieldarray)
-        {
-            $this->addHTML('<tr>');
-            foreach ($fieldarray as $col)
-            {
-                if (is_a($col, "DateTime"))
-                {
-                    $col = $col->format('D, d M y H:i:s');
-                }
-                $this->addHTML('<td>');
-                $this->addHTML((string)$col);
-                $this->addHTML('</td>');
-            }
-
-            $this->addHTML('</tr>');
-        }
+        $this->addData($dataarray);
 
         $afterTableComment = '';
         if (isset($this->options['LM_ADDNEW']))
@@ -333,7 +310,7 @@ class listMagic
     }
 
 
-    private function initHTML($title)
+    public function initHTML($title='')
     {
         if (isset($this->options['LM_DONTSORT']))
         {
@@ -353,16 +330,54 @@ class listMagic
             $search1 = '';
             $search2 = '';
         }
-        $this->addHTML('<div class="panel panel-default">
-<div class="panel-heading"><h3 class="panel-title">' . $title. '</h3></div>
-<div class="panel-body">'
+        $this->addHTML('<div class="panel panel-default">');
+        if ($title){$this->addHTML('<div class="panel-heading"><h3 class="panel-title">' . $title. '</h3></div>');}
+    $this->addHTML('<div class="panel-body">'
 . $search1 .
 '<table class="'.$search2.'col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">'
         );
     }
 
-    private function endHTML($afterTableComment='')
+    public function endHTML($afterTableComment='')
     {
         $this->addHTML('</table>'. $afterTableComment . '</div></div>');
+    }
+
+    /**
+     * @param $headers
+     */
+    public function addHeaders($headers)
+    {
+        $this->addHTML('<thead class="cf"><tr>');
+
+        foreach ($headers as $header)
+        {
+            $this->addHTML('<th>' . $header . '</th>');
+        }
+
+        $this->addHTML('</thead></tr>');
+    }
+
+    /**
+     * @param $dataarray
+     */
+    public function addData($dataarray)
+    {
+        foreach ($dataarray as $fieldarray)
+        {
+            $this->addHTML('<tr>');
+            foreach ($fieldarray as $col)
+            {
+                if (is_a($col, "DateTime"))
+                {
+                    $col = $col->format('D, d M y H:i:s');
+                }
+                $this->addHTML('<td>');
+                $this->addHTML((string)$col);
+                $this->addHTML('</td>');
+            }
+
+            $this->addHTML('</tr>');
+        }
     }
 }

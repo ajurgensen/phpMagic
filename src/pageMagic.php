@@ -147,6 +147,28 @@ $(document).on(\'ready\', function() {
         }
     }
 
+    public function addRow($content)
+    {
+        $this->addHtml($this->getRow($content));
+    }
+
+    public function getRow($content)
+    {
+        $html ='<div class="row">'.$content.'</div>';
+        return $html;
+    }
+
+    public function addCol($content,$width)
+    {
+        $this->addHtml($this->getCol($content,$width));
+    }
+
+    public function getCol($content,$width)
+    {
+        $html ='<div class="col-md-'.$width.'">'.$content.'</div>';
+        return $html;
+    }
+
     public function getPanel($text,$title='')
     {
         $html = '<div class="panel panel-default">';
@@ -255,6 +277,7 @@ $(document).on(\'ready\', function() {
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
     <script src="/js/fileinput.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
     <title>' .  $this->pageTitle .'</title>
 
     <!-- Bootstrap core CSS -->
