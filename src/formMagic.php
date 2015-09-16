@@ -96,13 +96,13 @@ class formMagic
         {
             $this->formNiceName =$options['FM_NAME'];
         }
-        elseif ($this->fromPropel)
+        elseif (isset($this->options['FM_OPTIONS']['autotranslate']))
         {
-            $this->formNiceName =$entity->getName();
+            $this->formNiceName = 'FM_' . $entity->getName();
         }
         else
         {
-            $this->formNiceName = "form";
+            $this->formNiceName = $entity->getName();
         }
 
         $this->formName= $this->cleanString($this->formNiceName);
@@ -254,13 +254,14 @@ class formMagic
         }
         elseif (isset($options['FM_OPTIONS']['autotranslate']))
         {
-            $desc = translate('FM_' . $colum->getTableName() . '_' . $colum->getName());
-
+            $desc = translate('FM_DESC_' .$colum->getName());
         }
         else
         {
-            $desc = $colum->getPhpName();
+            //$desc = translate('FM_' . $colum->getTableName() . '_' . $colum->getName());
+            $desc = "";
         }
+
 
 
         $max = $colum->getSize();
