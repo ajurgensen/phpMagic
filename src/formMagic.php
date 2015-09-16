@@ -208,15 +208,24 @@ class formMagic
         $rnd = md5($this->formName . rand(0,1000000000000000000000));
         $_SESSION[$this->formName] = $rnd;
 
+        $back = 'Back';
+        $send = 'Send';
+        if (isset($this->options['FM_OPTIONS']['autotranslate']))
+        {
+            $back = translate('FM_' . $this->formName . '_back');
+            $send = translate('FM_' . $this->formName . '_send');
+        }
+
+
         $html = "<input type='hidden' value='true' name='" . $this->formName . '_posted' . "'>";
         $html .= "<input type='hidden' value='". $rnd ."' name='" . $this->formName . '_key' . "'>";
         $html .= '<li class="list-group-item">';
         $html .= "&nbsp";
         $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
-        $html .= "<input type='submit' value='Send' class='btn btn-success '> &nbsp;";
+        $html .= "<input type='submit' value='" . $send . "' class='btn btn-success '> &nbsp;";
         $html .= '</div>';
         $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
-        $html .= '<input type="button" value="Back" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
+        $html .= '<input type="button" value="'.$back.'" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
         $html .= '</div>';
         $html .= '</li>';
         if ($error)
@@ -345,7 +354,13 @@ class formMagic
                             $entity->{$name}($value);
                         } else
                         {
-                            $errors[$colum->getPhpName()] = ': Not a valid email address <br>';
+                            $message = ": Not a valid email address";
+                            if (isset($this->options['FM_OPTIONS']['autotranslate']))
+                            {
+                                $message = translate('FM_' . $this->formName . '_eml_er');
+                            }
+
+                            $errors[$colum->getPhpName()] = $message . '<br>';
                         }
                     } elseif ($colum->getType() == 'VARCHAR' && strlen($value) <= $colum->getSize() && is_string($value))
                     {
@@ -572,7 +587,15 @@ class formMagic
             elseif ($colum->getType() == 'BOOLEAN')
             {
                 //Boolean
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => 'No', 1 => 'Yes'), $value);
+                $yes = 'yes';
+                $no = 'no';
+
+                if (isset($this->options['FM_OPTIONS']['autotranslate']))
+                {
+                    $yes = translate('FM_' . $this->formName . '_true');
+                    $no = translate('FM_' . $this->formName . '_false');
+                }
+                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => $no, 1 => $yes), $value);
             }
             elseif ($debug)
             {
