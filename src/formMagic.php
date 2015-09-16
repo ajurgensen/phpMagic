@@ -372,11 +372,18 @@ class formMagic
                         {
                             $errors[$colum->getPhpName()] = "Unable to update " . $colum->getPhpName();
                          }
-                    } elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
+                    }
+                    elseif ($colum->getType() == 'FLOAT' && (is_numeric($value) || is_float($value)))
                     {
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
-                    } elseif ($colum->getType() == 'TINYINT' && is_numeric($value) && $value < 256)
+                    }
+                    elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
+                    {
+                        $name = 'set' . $colum->getPhpName();
+                        $entity->{$name}($value);
+                    }
+                    elseif ($colum->getType() == 'TINYINT' && is_numeric($value) && $value < 256)
                     {
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
@@ -583,6 +590,15 @@ class formMagic
                 {$require = 'required';}
 
                 $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" '. $require .' ');
+            }
+            elseif ($colum->getType() == 'FLOAT')
+            {
+                //normal float
+                $require = '';
+                if ($this->fromPropel && $colum->isNotNull())
+                {$require = 'required';}
+
+                $html .= $this->addFormInputText($colum, $value, $options, ' type="number" step="0.01" data-parsley-trigger="change" '. $require .' ');
             }
             elseif ($colum->getType() == 'BOOLEAN')
             {
