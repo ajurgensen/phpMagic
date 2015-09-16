@@ -26,6 +26,8 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
+use League\Flysystem\Exception;
+
 class formMagic
 {
     var $entitySaved;
@@ -33,6 +35,7 @@ class formMagic
     var $entity;
     var $fromPropel;
     var $passAlongObjects;
+    var $options;
     var $name;
     var $names;
     var $formNiceName;
@@ -77,7 +80,7 @@ class formMagic
         $this->names = $names;
         $this->options = $options;
 
-        if ($entity->toArray())
+        if (method_exists($entity,'toArray'))
         {
             //we are coming from a Propel Object
             $map = $entity::TABLE_MAP;
@@ -128,7 +131,7 @@ class formMagic
                     $this->handlePostEntityAddons($entity, $map, $options);
                     $this->entitySaved = true;
                     $this->entity = $entity;
-                    return true;
+                    return;
                 }
                 else
                 {
@@ -454,12 +457,17 @@ class formMagic
                     $remoteEntities = call_user_func($name);
                     $remoteEntities = $remoteEntities->{"filterBy" . $addon_owner . "Id"}($addon_owner_id)->find();
 
-                } elseif (substr_count($addon, '-') == 1)
+                }
+                elseif (substr_count($addon, '-') == 1)
                 {
                     list($addon_table, $addon_link) = explode('-', $addon);
                     $name = ucfirst(strtolower($addon_table)) . "Query::create";
                     $remoteEntities = call_user_func($name);
                     $remoteEntities = $remoteEntities->find();
+                }
+                else
+                {
+                    throw new Exception('Misconfigured Addon: ' . $addon);
                 }
 
                 $name = ucfirst(strtolower($addon_table)) . "Query::create";

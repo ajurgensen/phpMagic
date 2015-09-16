@@ -31,14 +31,11 @@ class chartMagic
     var $html;
     var $outChartData;
     var $chartData;
-    var $charName;
+    var $chartName;
     var $intName;
 
     /**
-     * @param Array $entity Entity to build form from
-     * @param Array $options FM_DESCRIPTION FM_OPTIONS  FM_ADDONS FM_NAME FM_DESC FM_EXCLUDE
-     * @param Array $names array of 'tablename' => 'Name Shown'
-     * @param int $debug Enable debug or not - Defaults to not
+     * @param $chartname Name of Chart to be build
      */
     function __construct($chartname)
     {

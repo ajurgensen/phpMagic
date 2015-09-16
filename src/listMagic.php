@@ -108,16 +108,16 @@ class listMagic
                 $this->setFromPropel(1);
             }
         }
+        $linkarray = array();
         if (isset($this->options['LM_LINK']) && is_array($this->options['LM_LINK']))
         {
             foreach ($this->options['LM_LINK'] as $key=>$value)
             {
                 $linkarray[$key] = $value;
             }
-
-        } else
+        }
+        else
         {
-            $linkarray = array();
             $nolinking = 1;
         }
 
@@ -195,6 +195,7 @@ class listMagic
         foreach ($entites as $entity)
         {
             $fieldarray = array();
+            $data = '';
             foreach ($cols as $col)
             {
                 if (!isset($headers[$col['headername']]))
@@ -240,7 +241,10 @@ class listMagic
                     }
                     $data = '<a href="' . $entity->{$col['link']} . '">' . $data . '</a>';
                 }
-                $fieldarray[] = $data;
+                if ($data)
+                {
+                    $fieldarray[] = $data;
+                }
             }
 
             if ($this->fromPropel)
