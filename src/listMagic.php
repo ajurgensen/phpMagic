@@ -88,7 +88,7 @@ class listMagic
         $cols = array();
         if (!count($entites))
         {
-            return;
+            //return;
         } else
         {
             foreach ($entites as $first_ob)
