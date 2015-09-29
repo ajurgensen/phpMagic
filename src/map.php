@@ -102,10 +102,6 @@ class map
         return $this->name;
     }
 
-    function toArray()
-    {
-        return false;
-    }
     function __construct($name)
     {
         $this->name = $name;
