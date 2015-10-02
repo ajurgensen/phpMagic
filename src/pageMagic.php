@@ -66,14 +66,26 @@ class pageMagic
     }
 
 
-    public function addFileUploader($title='')
+    public function addFileUploader($title='',$autotranslate=0)
     {
+
+        if ($autotranslate)
+        {
+            $translate  =     ',browseLabel: "'. translate('file_upload_browse') .'"';
+            $translate .=     ',uploadLabel: "'. translate('file_upload_upload') .'"';
+            $translate .=     ',removeLabel: "'. translate('file_upload_remove') .'"';
+        }
+        else
+        {
+            $translate = '';
+        }
+
         $html =
 '<form method="post" enctype="multipart/form-data" name="fileUploadForm">
 <input id="input-4" type="file" multiple=true class="file-loading" name="uploadFile">
 <script>
 $(document).on(\'ready\', function() {
-    $("#input-4").fileinput({showCaption: false});
+    $("#input-4").fileinput({showCaption: false' . $translate . '});
 });
 </script>
 </form>';

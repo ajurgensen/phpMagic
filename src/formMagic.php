@@ -219,7 +219,6 @@ class formMagic
             $send = translate('FM_' . $this->formName . '_send');
         }
 
-
         $html = "<input type='hidden' value='true' name='" . $this->formName . '_posted' . "'>";
         $html .= "<input type='hidden' value='". $rnd ."' name='" . $this->formName . '_key' . "'>";
         $html .= '<li class="list-group-item">';
@@ -227,8 +226,13 @@ class formMagic
         $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
         $html .= "<input type='submit' value='" . $send . "' class='btn btn-success '> &nbsp;";
         $html .= '</div>';
-        $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
-        $html .= '<input type="button" value="'.$back.'" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
+
+        if (!isset($this->options['FM_OPTIONS']['hideback']))
+        {
+            $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
+            $html .= '<input type="button" value="' . $back . '" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
+        }
+
         $html .= '</div>';
         $html .= '</li>';
         if ($error)
