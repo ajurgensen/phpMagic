@@ -534,10 +534,7 @@ class formMagic
             } else
             {
                 $name = 'get' . $colum->getPhpName();
-                if ($this->getFromPropel())
-                {
-                    $value = $entity->{$name}();
-                } else
+                if (!$value = $entity->{$name}())
                 {
                     $value = '';
                 }

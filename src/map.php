@@ -73,6 +73,11 @@ class map
 
     function __call($func, $params)
     {
+        if (substr($func,0,3) == 'get')
+        {
+            $name = substr($func,3);
+            return $this->staticVars[$name];
+        }
         if (substr($func,0,3) == 'set')
         {
             $name = substr($func,3);
