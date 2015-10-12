@@ -26,8 +26,6 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
-use League\Flysystem\Exception;
-
 class formMagic
 {
     var $entitySaved;
@@ -285,7 +283,7 @@ class formMagic
         return $html;
     }
 
-    private function addDateTimePicker($nicename,$name, $value)
+    private function addDateTimePicker($nicename,$name, \DateTime $value)
     {
         $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('m-d-y h:m:s')."' id='datetimepicker4' />
 
@@ -643,7 +641,10 @@ class formMagic
             }
             elseif ($colum->getType() == 'TIMESTAMP')
             {
-
+                if (!is_a($value, 'DateTime'))
+                {
+                    $value = new \DateTime();
+                }
                 $html .= $this->addDateTimePicker($colum->getPhpName(),$colum->getName(),$value);
 
             }
