@@ -35,6 +35,11 @@ class pageMagic
     private $uploadedFile;
     private $defaultInitiate;
     private $uploadHandled;
+    public $AsseticJS;
+    public $AsseticCSS;
+    public $JSfile;
+    public $CSSfile;
+    private $needFileReWrite;
 
     public static function staticTest()
     {
@@ -45,7 +50,6 @@ class pageMagic
     {
         return($this->html);
     }
-
 
     private function sessionCheck()
     {
@@ -245,15 +249,93 @@ $(document).on(\'ready\', function() {
         $this->uploadedFile = false;
         $this->pageTitle = $name;
         $this->defaultInitiate = $defaultInitiate;
+
+        $this->needFileReWrite = false;
+        $this->JSfile = '/scrpt.js';
+        $this->CSSfile = '/csses.css';
+
+        $this->AsseticCSS = new \Assetic\Asset\AssetCollection();
+        $this->addCSS('../vendor/twbs/bootstrap/dist/css/bootstrap.min.css');
+        $this->addCSS('../vendor/kartik-v/bootstrap-fileinput/css/fileinput.min.css');
+        $this->AsseticJS = new \Assetic\Asset\AssetCollection();
+        $this->addJS('../vendor/components/jquery/jquery.min.js');
+        $this->addJS('../vendor/moment/moment/moment.js');
+        $this->addJS('../vendor/twbs/bootstrap/dist/js/bootstrap.min.js');
+        $this->addJS('../vendor/eonasdan/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js');
+        $this->addJS('http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js');
+        $this->addJS('../vendor/kartik-v/bootstrap-fileinput/js/fileinput.min.js');
+
+
         if ($this->defaultInitiate)
         {
             $this->addBoostrapHeader();
         }
     }
 
+    public function addCSS($css)
+    {
+        $localfile = $_SERVER['DOCUMENT_ROOT'] . $this->CSSfile;
+        if (!file_exists($localfile))
+        {
+                touch($localfile, 1);
+        }
+        if (file_exists($css))
+        {
+            if (filemtime($css) > filemtime($localfile))
+            {
+                $this->needFileReWrite = true;
+            }
+                $this->AsseticCSS->add(new \Assetic\Asset\FileAsset($css));
+        }
+        elseif (parse_url($css))
+        {
+            $this->AsseticCSS->add(new \Assetic\Asset\HttpAsset($css));
+        }
+        else
+        {
+            throw new Exception('PM: CSS for inclusion should be either file or URL');
+
+        }
+    }
+
+
+    public function addJS($js)
+    {
+        $localfile = $_SERVER['DOCUMENT_ROOT'] . $this->JSfile;
+        if (!file_exists($localfile))
+        {
+            touch($localfile, 1);
+        }
+        if (file_exists($js))
+        {
+            if (filemtime($js) > filemtime($localfile))
+            {
+                $this->needFileReWrite = true;
+            }
+            $this->AsseticJS->add(new \Assetic\Asset\FileAsset($js));
+        }
+        elseif (parse_url($js))
+        {
+            $this->AsseticJS->add(new \Assetic\Asset\HttpAsset($js));
+        }
+        else
+        {
+            throw new Exception('PM: JS for inclusion should be either file or URL');
+
+        }
+    }
+
+
     public function finalize()
     {
-        $this->addBoostrapFooter();
+        $this->addBodyHTMLEnd();
+        $JSfile = $_SERVER["DOCUMENT_ROOT"] . $this->JSfile;
+        $CSSfile = $_SERVER["DOCUMENT_ROOT"] . $this->CSSfile;
+        if ($this->needFileReWrite)
+        {
+            file_put_contents($JSfile, $this->AsseticJS->dump());
+            file_put_contents($CSSfile, $this->AsseticCSS->dump());
+        }
         echo $this->getHTML();
     }
 
@@ -265,17 +347,9 @@ $(document).on(\'ready\', function() {
         $this->html .= $html;
     }
 
-
-    private function addBoostrapFooter()
+    private function addBodyHTMLEnd()
     {
-
-        $this->addHtml('    </div>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/tableSort.js"></script>
-<script src="/js/tablesearch.js"></script>
-</body>
-</html>
-');
+        $this->addHtml('</div></body></html>');
     }
 
     private function addBoostrapHeader()
@@ -286,16 +360,10 @@ $(document).on(\'ready\', function() {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="/js/fileinput.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+    <script src="'. $this->JSfile  .'"></script>
     <title>' .  $this->pageTitle .'</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/fileinput.min.css" rel="stylesheet">
-
+    <link href="'. $this->CSSfile .'" rel="stylesheet">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>

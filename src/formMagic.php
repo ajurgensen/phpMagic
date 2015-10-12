@@ -285,6 +285,20 @@ class formMagic
         return $html;
     }
 
+    private function addDateTimePicker($nicename,$name, $value)
+    {
+        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('m-d-y h:m:s')."' id='datetimepicker4' />
+
+                        <script type='text/javascript'>
+            $(function () {
+                $('#datetimepicker4').datetimepicker();
+            });
+        </script>";
+        $html = $this->addFormElement($nicename,$html);
+        return $html;
+    }
+
+
     /**
      * @param $name
      * @param array $optionarray
@@ -396,6 +410,10 @@ class formMagic
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
                     } elseif ($colum->getType() == 'BOOLEAN' && ($value == 1 || $value == 0))
+                    {
+                        $name = 'set' . $colum->getPhpName();
+                        $entity->{$name}($value);
+                    } elseif ($colum->getType() == 'TIMESTAMP')
                     {
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
@@ -622,6 +640,12 @@ class formMagic
                     $no = translate('FM_' . $this->formName . '_false');
                 }
                 $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => $no, 1 => $yes), $value);
+            }
+            elseif ($colum->getType() == 'TIMESTAMP')
+            {
+
+                $html .= $this->addDateTimePicker($colum->getPhpName(),$colum->getName(),$value);
+
             }
             elseif ($debug)
             {
