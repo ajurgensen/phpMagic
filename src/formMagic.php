@@ -566,6 +566,10 @@ class formMagic
             {
                 //We were blacklisted
             }
+            elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id')))
+            {
+                //We were blacklisted
+            }
             elseif (isset($options[$colum->getName()]))
             {
                 //We are have custom Optionset for this one

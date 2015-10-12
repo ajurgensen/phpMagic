@@ -148,6 +148,10 @@ class listMagic
                 {
                     //excluded
                 }
+                elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id')))
+                {
+                    //excluded
+                }
                 elseif (!$nolinking && array_key_exists($colum->getName(), $linkarray))
                 {
                     //Name field - add id link!
