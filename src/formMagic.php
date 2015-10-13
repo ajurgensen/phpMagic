@@ -411,11 +411,19 @@ class formMagic
                     {
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
-                    } elseif ($colum->getType() == 'TIMESTAMP')
+                    }
+                    elseif ($colum->getType() == 'TIMESTAMP')
                     {
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
-                    }else
+                    }
+                    elseif ($colum->getType() == 'ENUM')
+                    {
+                        $valueset = $colum->getValueSet();
+                        $name = 'set' . $colum->getPhpName();
+                        $entity->{$name}($valueset[$value]);
+                    }
+                    else
                     {
                         $errors[$colum->getPhpName()] = "Error: " . $colum->getPhpName();
                     }
@@ -651,6 +659,12 @@ class formMagic
                 }
                 $html .= $this->addDateTimePicker($colum->getPhpName(),$colum->getName(),$value);
 
+            }
+            elseif ($colum->getType() == 'ENUM')
+            {
+                $selectedValueCode = array_search($value,$colum->getValueSet());
+
+                $html .= $this->addFormSelect($colum->getPhpName(),$colum->getName(),$colum->GetValueSet(),$selectedValueCode);
             }
             elseif ($debug)
             {

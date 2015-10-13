@@ -197,6 +197,34 @@ $(document).on(\'ready\', function() {
     }
 
 
+    public function getButton($text,$link='')
+    {
+        $html ='';
+        if ($link)
+        {
+            $html .= '<a href="'.$link.'">';
+        }
+        $html .= '<button type="button" class="btn btn-default">'.$text.'</button>';
+        if ($link)
+        {
+            $html .= '</a>';
+        }
+        return($html);
+    }
+
+    public function getButtonGroup(array $buttonGroup)
+    {
+
+        $html = '<div class="btn-group" role="group" aria-label="...">';
+        foreach ($buttonGroup as $button)
+        {
+            $html .= $button;
+        }
+        $html .= '</div>';
+        return($html);
+    }
+
+
     public function addPanel($text,$title='')
     {
         $this->addHtml($this->getPanel($text,$title));

@@ -189,6 +189,13 @@ class listMagic
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'TIMESTAMP';
                 }
+                elseif ($colum->getType() == 'ENUM')
+                {
+                    //Timestamp field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'VARCHAR';
+                }
             }
         }
 
