@@ -285,11 +285,11 @@ class formMagic
 
     private function addDateTimePicker($nicename,$name, \DateTime $value)
     {
-        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('m-d-y h:m:s')."' id='datetimepicker4' />
+        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('m-d-y h:m:s')."' id='datetimepicker". $nicename ."' />
 
                         <script type='text/javascript'>
             $(function () {
-                $('#datetimepicker4').datetimepicker();
+                $('#datetimepicker". $nicename ."').datetimepicker();
             });
         </script>";
         $html = $this->addFormElement($nicename,$html);

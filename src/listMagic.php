@@ -256,6 +256,10 @@ class listMagic
                 {
                     $fieldarray[] = $data;
                 }
+                else
+                {
+                    $fieldarray[] = '';
+                }
             }
 
             if ($this->fromPropel)
