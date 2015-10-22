@@ -84,6 +84,9 @@ class pageMagic
             $translate = '';
         }
 
+        $translate .=     ',uploadClass: "btn btn-success"';
+
+
         $html =
 '<form method="post" enctype="multipart/form-data" name="fileUploadForm">
 <input id="input-4" type="file" multiple=true class="file-loading" name="uploadFile">

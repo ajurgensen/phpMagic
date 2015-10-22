@@ -574,7 +574,7 @@ class formMagic
             {
                 //We were blacklisted
             }
-            elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id')))
+            elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id','CREATED_AT','UPDATED_AT','VERSION','USER_ID')))
             {
                 //We were blacklisted
             }
