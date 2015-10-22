@@ -325,10 +325,18 @@ class formMagic
      * @param $value
      * @return string
      */
-    private function addFormMultiSelect($nicename,$name, array $optionarray, array $selected)
+    private function addFormMultiSelect($nicename,$name, array $optionarray, array $selected, $required = true)
     {
+        if (!$required)
+        {
+            $required = '';
+        }
+        else
+        {
+            $required = 'required';
+        }
         $count = count($optionarray);
-        $html = "<select data-parsley-trigger='change' size='" .$count . "' required multiple class='form-control' name='" . $name . "[]'>";
+        $html = "<select data-parsley-trigger='change' size='" .$count . "' ". $required ." multiple class='form-control' name='" . $name . "[]'>";
         foreach ($optionarray as $key => $value)
         {
             $sel = '';
@@ -438,6 +446,11 @@ class formMagic
         {
             foreach ($options['FM_ADDONS'] as $addon)
             {
+                if (is_array($addon))
+                {
+                    $addon = $addon[0];
+                }
+
                 //Image-serviceHasImage-User-125');
                 list($addon_table, $addon_link) = explode('-', $addon);
 
@@ -477,6 +490,16 @@ class formMagic
         {
             foreach ($options['FM_ADDONS'] as $addon)
             {
+                $required = true;
+                if (is_array($addon))
+                {
+                    if (isset($addon['notrequired']))
+                    {
+                        $required = false;
+                    }
+                    $addon = $addon[0];
+                }
+
                 //Image-serviceHasImage-User-125');
                 if (substr_count($addon, '-') == 3)
                 {
@@ -495,7 +518,7 @@ class formMagic
                 }
                 else
                 {
-                    throw new Exception('Misconfigured Addon: ' . $addon);
+                    throw new \Exception('Misconfigured Addon: ' . $addon);
                 }
 
                 $name = ucfirst(strtolower($addon_table)) . "Query::create";
@@ -529,7 +552,7 @@ class formMagic
                     }
 
 
-                    $html .= $this->addFormMultiSelect($name, $addon_link, $optionarray, $values);
+                    $html .= $this->addFormMultiSelect($name, $addon_link, $optionarray, $values,$required);
                 }
             }
             return $html;
