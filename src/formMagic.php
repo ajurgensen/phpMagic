@@ -371,9 +371,21 @@ class formMagic
         {
             if (!$colum->isPrimaryKey() && !$colum->isPrimaryString())
             {
+                //General validation
                 if (isset($_POST[$colum->getName()]))
                 {
                     $value = $_POST[$colum->getName()];
+
+                    //General validation
+                    if (isset($this->options['FM_VALIDATION_BLOCK'][$colum->getName()]) && $function = $this->options['FM_VALIDATION_BLOCK'][$colum->getName()])
+                    {
+                        if ($error = call_user_func($function,$value,$entity->getId()))
+                        {
+                            $errors[$colum->getPhpName()] =  $error  . '<br>';
+                        }
+                    }
+
+                    //Start the processing and test for types
                     if (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR' && strlen($value) <= $colum->getSize() && is_string($value))
                     {
                         if (filter_var($value, FILTER_VALIDATE_EMAIL))
