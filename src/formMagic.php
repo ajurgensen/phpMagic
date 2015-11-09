@@ -147,6 +147,7 @@ class formMagic
         if (1==1 || $this->getFromPropel())
         {
             $html .= $this->buildFormEntity($entity, $options, $names, $debug, $map);
+            $html .= $this->buildFormVirtualCols($entity, $options, $names, $debug, $map);
             $html .= $this->buildFormEntityAddons($entity, $options, $map);
             $html .= $this->finalizeForm($errorsText);
         }
@@ -709,4 +710,48 @@ class formMagic
         }
         return $html;
     }
+
+    /**
+     * @param $entity
+     * @param $options
+     * @param $names
+     * @param $debug
+     * @param $map
+     * @param $html
+     * @return string HTML
+     */
+    private function buildFormVirtualCols($entity, $options, $names, $debug, $map)
+    {
+        $cols = $entity->getVirtualColumns();
+        $html = '';
+        if (!is_array($cols))
+        {
+            return('');
+        }
+        $html = '';
+        foreach ($cols as $col => $value)
+        {
+            //If we have POST data and are here, it's an error situation, use that data and not DB data
+            if (isset($_POST[$col]))
+            {
+                $value = $_POST[$col];
+            }
+
+            $name = $this->cleanString($col);
+            $nicename = $col;
+
+            $type = 'text';
+            if (substr_count(strtolower($col),'password'))
+            {
+                $type = 'password';
+            }
+
+            $addhtml = "<input size=32 data-parsley-trigger='change' required placeholder='" . $nicename . "' class='form-control' value='" . $value . "' type='". $type ."' name='" . $name . "'>";
+            $html .= $this->addFormElement($nicename, $addhtml);
+
+
+        }
+        return $html;
+    }
+
 }

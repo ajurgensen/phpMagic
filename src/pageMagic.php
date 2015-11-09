@@ -233,31 +233,48 @@ $(document).on(\'ready\', function() {
         $this->addHtml($this->getPanel($text,$title));
     }
 
-    public function addMenu($menu)
+    public function addMenu($menu,$brand='')
     {
         $this->addHtml('<nav class="navbar navbar-default">
         <div class="container-fluid">
-          <div id="navbar" class="navbar-collapse collapse">');
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">'.$brand.'</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">');
 
         foreach ($menu as $heading => $submenu)
         {
-            $this->addHtml('<ul class="nav navbar-nav">
+            if (is_array($submenu))
+            {
+                $this->addHtml('<ul class="nav navbar-nav">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">&nbsp; ' . $heading . '<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">');
-            foreach ($submenu as $submenuheading => $link)
-            {
+                foreach ($submenu as $submenuheading => $link)
+                {
 
-                $this->addHtml('<li><a href="'. $link .'"><span>&nbsp; '. $submenuheading .'</span></a></li>');
+                    $this->addHtml('<li><a href="' . $link . '"><span>&nbsp; ' . $submenuheading . '</span></a></li>');
+                }
+            }
+            else
+            {
+                $this->addHtml('<li><a href="'.$submenu.'">'.$heading.'</a></li>');
             }
 
             $this->addHtml('</ul>
-              </li>
-            </ul>');
+              </li>');
 
         }
 
-        $this->addHtml('</div><!--/.nav-collapse -->
+        $this->addHtml('</ul></div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>');
     }
