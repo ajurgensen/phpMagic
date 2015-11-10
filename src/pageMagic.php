@@ -195,7 +195,8 @@ $(document).on(\'ready\', function() {
         {
             $html .= '<div class="panel-heading">'. $title .'</div>';
         }
-        $html .= '<div class="panel-body">' . $text . '</div></div>';
+        $html .= '<div class="panel-body">' . $text . '</div>';
+        $html .= '</div>';
         return($html);
     }
 
@@ -252,7 +253,12 @@ $(document).on(\'ready\', function() {
 
         foreach ($menu as $heading => $submenu)
         {
-            if (is_array($submenu))
+            if ($heading == 'PM_FORM')
+            {
+
+                $this->addHtml($submenu);
+            }
+            elseif (is_array($submenu))
             {
                 $this->addHtml('<ul class="nav navbar-nav">
               <li class="dropdown">

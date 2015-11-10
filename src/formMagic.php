@@ -171,14 +171,23 @@ class formMagic
         {
             $nicename = $name;
         }
-        $html = '<li class="list-group-item"><div class="row">';
-        $html .= '<div class="col-xs-5">';
-        $html .= '<label for="' . $name . '">' . $nicename . ":</label>";
-        $html .= '</div>';
-        $html .= '<div class="col-xs-7">';
+        $html = '';
+
+        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        {
+            $html = '<li class="list-group-item"><div class="row">';
+            $html .= '<div class="col-xs-5">';
+            $html .= '<label for="' . $name . '">' . $nicename . ":</label>";
+            $html .= '</div>';
+            $html .= '<div class="col-xs-7">';
+        }
+
         $html .= $formElement;
-        $html .= '</div>';
-        $html .= '</div></li>';
+        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        {
+            $html .= '</div>';
+            $html .= '</div></li>';
+        }
         return $html;
     }
 
@@ -188,9 +197,14 @@ class formMagic
      */
     private function initForm()
     {
-        $html = '<div class="panel panel-default">';
-        $html .= '<div class="panel-heading"><strong>' . $this->formNiceName. '</strong></div>';
-        $html .= '<div class="panel-body"><p>' . $this->formDesc . '</p></div>';
+        $html = '';
+        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        {
+            $html = '<div class="panel panel-default">';
+            $html .= '<div class="panel-heading"><strong>' . $this->formNiceName . '</strong></div>';
+            $html .= '<div class="panel-body"><p>' . $this->formDesc . '</p></div>';
+        }
+
         $html .= '<ul class="list-group">';
         $html .= '<form method="post">';
         $html .= '<div class="form-group">';
@@ -229,7 +243,7 @@ class formMagic
         if (!isset($this->options['FM_OPTIONS']['hideback']))
         {
             $html .= '<div class="btn-group pull-right" role="group" aria-label="...">';
-            $html .= '<input type="button" value="' . $back . '" class="btn btn-default" onclick="window.history.back()" />  &nbsp;';
+            $html .= '<input type="button" value="' . $back . '" class="btn btn-default" onclick="window.history.back()" />  &nbsp;</div>';
         }
 
         $html .= '</div>';
@@ -240,10 +254,12 @@ class formMagic
             $html .= '<div class="alert alert-danger" >' . $error . '</div >';
             $html .= '</li>';
         }
-        $html .= '</div>';
         $html .= "</form>";
         $html .= '</ul>';
-        $html .= '</div>';
+        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        {
+            $html .= '</div>';
+        }
         return($html);
     }
 
@@ -607,10 +623,6 @@ class formMagic
 
             //Ok, start the colunm processing
             if (isset($options['FM_EXCLUDE']) && in_array($colum->getName(), $options['FM_EXCLUDE']))
-            {
-                //We were blacklisted
-            }
-            elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id','CREATED_AT','UPDATED_AT','VERSION','USER_ID')))
             {
                 //We were blacklisted
             }

@@ -76,7 +76,12 @@ class map
         if (substr($func,0,3) == 'get')
         {
             $name = substr($func,3);
-            return $this->staticVars[$name];
+            if (isset($this->staticVars[$name]))
+            {return $this->staticVars[$name];}
+            else
+            {
+                return false;
+            }
         }
         if (substr($func,0,3) == 'set')
         {
@@ -99,17 +104,10 @@ class map
             $this->addColumn($col);
         }
     }
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
 
     function __construct($name)
     {
-        $this->name = $name;
+        $this->setName($name);
         $this->columns = array();
     }
 
