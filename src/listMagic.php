@@ -273,7 +273,11 @@ class listMagic
                     {
                         if (!isset($headers[$key]))
                         {
-                            if (isset($options['LM_DESCRIPTION'][$key]))
+                            if (isset($names[$key]))
+                            {
+                                $headers[$key] = $names[$key];
+                            }
+                            elseif (isset($options['LM_DESCRIPTION'][$key]))
                             {
                                 $headers[$key] = $options['LM_DESCRIPTION'][$key];
                             } else

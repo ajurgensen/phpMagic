@@ -39,6 +39,23 @@ class configMagic
     public $namesname;
     public $whatTypeAreWe;
     private $saved;
+    private $adminMode;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminMode()
+    {
+        return $this->adminMode;
+    }
+
+    /**
+     * @param mixed $adminMode
+     */
+    public function setAdminMode($adminMode)
+    {
+        $this->adminMode = $adminMode;
+    }
 
 
     public function saved()
@@ -113,6 +130,7 @@ class configMagic
 
     function __construct(&$entity,$viewname='', $namesname='')
     {
+        $this->setAdminMode(false);
     }
 
 
@@ -173,24 +191,89 @@ class configMagic
     }
 
 
-    public static function newform(&$entity,$viewname='', $namesname='')
+    public static function newform(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
         $form = new configMagic($entity,$viewname,$namesname);
         $form->setWhatTypeAreWe('form');
+        $form->setAdminMode($adminEdit);
         $form->init($entity,$viewname,$namesname);
-        $form->doForm($entity);
+        if (!$form->demoshown)
+        {
+            $form->doForm($entity);
+        }
         return($form);
     }
 
-    public static function newlist(&$entity,$viewname='', $namesname='')
+    public static function newlist(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
         $list = new configMagic($entity,$viewname,$namesname);
         $list->setWhatTypeAreWe('list');
+        $list->setAdminMode($adminEdit);
         $list->init($entity,$viewname,$namesname);
         $list->doList($entity);
         return($list);
     }
 
+
+    private function proccessColum($columName,pageMagic $pm)
+    {
+        $map = new \ajurgensen\phpMagic\map($columName);
+        $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'Name', 'VARCHAR'));
+        $map->addColumn(new \ajurgensen\phpMagic\colum('Excluded', 'Excluded', 'BOOLEAN'));
+        $map->addColumn(new \ajurgensen\phpMagic\colum('LinkCol', 'LinkCol', 'VARCHAR'));
+
+        $state = 0;
+        if (isset($this->options['EXCLUDE']) && in_array($columName, $this->options['EXCLUDE']))
+        {
+            $state = 1;
+        }
+        $map->setExcluded($state);
+        if (isset($this->names[$columName]))
+        {
+            $map->setName($this->names[$columName]);
+        }
+
+        if (isset($this->options['LINK'][$columName]))
+        {
+            $map->setLinkCol($this->options['LINK'][$columName]);
+        }
+
+        $editoptions['NAME'] = 'Editing ' . $columName;
+        $editoptions['DESC'] = '';
+
+
+        $fm = new \ajurgensen\phpMagic\formMagic($map, $editoptions, array());
+
+        if ($fm->entitySaved)
+        {
+            if (strlen($map->getName()) > 0)
+            {
+                $this->names[$columName] = $map->getName();
+            }
+            else
+            {
+                unset($this->names[$columName]);
+            }
+
+            unset($this->options['LINK'][$columName]);
+            if ($map->staticVars['LinkCol'])
+            {
+                $this->options['LINK'] = array_merge($this->options['LINK'], array($columName =>$map->staticVars['LinkCol']));
+            }
+
+            if ($map->staticVars['Excluded'] == 1)
+            {
+                array_push($this->options['EXCLUDE'], $columName);
+            } else
+            {
+                $this->options['EXCLUDE'] = array_diff($this->options['EXCLUDE'], array($columName));
+            }
+            $this->diskWriteOptions($this->options);
+            $this->diskWriteNames($this->names);
+            return false;
+        }
+        return ($pm->getPanel($fm->html, $columName));
+    }
 
     public function doForm(&$entity)
     {
@@ -198,7 +281,10 @@ class configMagic
         $fm = new formMagic($entity,$this->getFormOptions(),$this->names);
         $this->setHtml($fm->html);
 
-        $this->setHtml($this->getHtml() . '<a href="?'. $this->viewname . $this->namesname.'">hest</a>');
+        if ($this->getAdminMode())
+        {
+            $this->setHtml($this->getHtml() . '<a href="?'. $this->viewname . $this->namesname.'">setup form</a>');
+        }
 
         if ($fm->entitySaved)
         {
@@ -212,7 +298,10 @@ class configMagic
         $lm = new listMagic($entity,$this->getListOptions(),$this->names);
         $this->setHtml($lm->getHTML());
 
-        $this->setHtml($this->getHtml() . '<a href="?'. $this->viewname . $this->namesname.'">hest</a>');
+        if ($this->getAdminMode())
+        {
+            $this->setHtml($this->getHtml() . '<a href="?' . $this->viewname . $this->namesname . '">setup list</a>');
+        }
 
         return;
     }
@@ -328,89 +417,48 @@ class configMagic
             }
             $entitymap = $first_ob::TABLE_MAP;
             $entitymap = $entitymap::getTableMap();
-
+            $entityVirtualCols = $first_ob->getVirtualColumns();
         }
         elseif($this->getWhatTypeAreWe() == 'form')
         {
             $entitymap = $entity::TABLE_MAP;
             $entitymap = $entitymap::getTableMap();
+            $entityVirtualCols = $entity->getVirtualColumns();
         }
-
-
-
 
         $loopHtmlBuilder = '';
 
         foreach ($entitymap->getColumns() as $colum)
         {
-            $map = new \ajurgensen\phpMagic\map($colum->getName());
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'Name', 'VARCHAR'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Excluded', 'Excluded', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('LinkCol', 'LinkCol', 'VARCHAR'));
-
-            $state = 0;
-            if (isset($this->options['EXCLUDE']) && in_array($colum->getName(), $this->options['EXCLUDE']))
+            if ($hest = $this->proccessColum($colum->getName(),$pm))
             {
-                $state = 1;
+                $loopHtmlBuilder .= $hest;
             }
-            $map->setExcluded($state);
-            if (isset($this->names[$colum->getName()]))
+            else
             {
-                $map->setName($this->names[$colum->getName()]);
+                return true;
             }
-
-            if (isset($this->options['LINK'][$colum->getName()]))
-            {
-                $map->setLinkCol($this->options['LINK'][$colum->getName()]);
-            }
-
-
-
-
-            $editoptions['NAME'] = 'Editing ' . $colum->getName();
-            $editoptions['DESC'] = '';
-            $editoptions['FM_SLIMFORM'] = TRUE;
-
-
-            $fm = new \ajurgensen\phpMagic\formMagic($map, $editoptions, array());
-
-            if ($fm->entitySaved)
-            {
-                if (strlen($map->getName()) > 0)
-                {
-                    $this->names[$colum->getName()] = $map->getName();
-                }
-                else
-                {
-                    unset($this->names[$colum->getName()]);
-                }
-
-                unset($this->options['LINK'][$colum->getName()]);
-                if ($map->staticVars['LinkCol'])
-                {
-                    $this->options['LINK'] = array_merge($this->options['LINK'], array($colum->getName() =>$map->staticVars['LinkCol']));
-                }
-
-                if ($map->staticVars['Excluded'] == 1)
-                {
-                    array_push($this->options['EXCLUDE'], $colum->getName());
-                } else
-                {
-                    $this->options['EXCLUDE'] = array_diff($this->options['EXCLUDE'], array($colum->getName()));
-                }
-                $this->diskWriteOptions($this->options);
-                $this->diskWriteNames($this->names);
-                return (true);
-            }
-            $loopHtmlBuilder .= $pm->getPanel($fm->html, $colum->getName());
         }
+
+        foreach ($entityVirtualCols as $key => $value)
+        {
+            if ($hest = $this->proccessColum($key,$pm))
+            {
+                $loopHtmlBuilder .= $hest;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
         $loopHtml = $pm->getPanel($loopHtmlBuilder, 'Fields');
 
         if ($this->getWhatTypeAreWe() == 'form')
         {
-            $demoHtml = '';
-            //$fm = new formMagic($entity, $this->options, $this->names);
-            //$demoHtml = $pm->getPanel($fm->html, 'Form');
+            $fm = new formMagic($entity, $this->getFormOptions(), $this->names);
+            $demoHtml = $pm->getPanel($fm->html, 'Form');
         }
         elseif($this->getWhatTypeAreWe() == 'list')
         {
@@ -418,7 +466,7 @@ class configMagic
             $demoHtml = $pm->getPanel($lm->getHTML(), 'List');
         }
 
-        $pm->addRow($pm->getCol($demoHtml, 4) . $pm->getCol($settingsHtml, 4) . $pm->getCol($loopHtml, 4));
+        $pm->addRow($pm->getCol($demoHtml,6) . $pm->getCol($settingsHtml, 3) . $pm->getCol($loopHtml, 3));
 
         $pm->finalize();
         return (false);
