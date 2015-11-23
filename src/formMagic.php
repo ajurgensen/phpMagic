@@ -99,11 +99,15 @@ class formMagic
         }
         elseif (isset($this->options['FM_OPTIONS']['autotranslate']))
         {
-            $this->formNiceName = 'FM_' . $entity->getName();
+            $this->formNiceName = 'FM_' . get_class($entity);
+        }
+        elseif ((substr_count(get_class($entity),'map')) && $entity->getObjectName())
+        {
+            $this->formNiceName = $entity->getObjectName();
         }
         else
         {
-            $this->formNiceName = $entity->getName();
+            $this->formNiceName = get_class($entity);
         }
 
         $this->formName= $this->cleanString($this->formNiceName);
@@ -649,7 +653,14 @@ class formMagic
                 {
                     foreach ($remoteEntities as $out)
                     {
-                        $optionarray[$out->getId()] = $out->getName();
+                        try
+                        {
+                            $optionarray[$out->getId()] = $out->getName();
+                        }
+                        catch (\Exception $e)
+                        {
+
+                        }
                     }
                     if (!isset($newname))
                     {

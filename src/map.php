@@ -107,7 +107,7 @@ class map
 
     function __construct($name)
     {
-        $this->setName($name);
+        $this->setObjectName($name);
         $this->columns = array();
     }
 

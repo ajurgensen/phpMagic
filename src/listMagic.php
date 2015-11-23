@@ -79,7 +79,7 @@ class listMagic
      * @param Array $entites Collection of entities to be listed. Could be a list of Propel Objects
      * @param Array $options LM_LINK LM_EXCLUDE LM_DESCRIPTION LM_NAME LM_ADDNEW LM_DONTSORT
      */
-    function __construct($entites=array(),$options=array())
+    function __construct($entites=array(),$options=array(),$names = array())
     {
         $this->options = $options;
         $this->HTMLready = true;
@@ -148,10 +148,6 @@ class listMagic
                 {
                     //excluded
                 }
-                elseif (in_array($colum->getName(), array('created_at','updated_at','version','user_id')))
-                {
-                    //excluded
-                }
                 elseif (!$nolinking && array_key_exists($colum->getName(), $linkarray))
                 {
                     //Name field - add id link!
@@ -211,7 +207,11 @@ class listMagic
             {
                 if (!isset($headers[$col['headername']]))
                 {
-                    if (isset($options['LM_DESCRIPTION'][$col['headername']]))
+                    if (isset($names[$col['headername']]))
+                    {
+                        $headers[$col['headername']] = $names[$col['headername']];
+                    }
+                    elseif (isset($options['LM_DESCRIPTION'][$col['headername']]))
                     {
                         $headers[$col['headername']] = $options['LM_DESCRIPTION'][$col['headername']];
                     } else
@@ -244,7 +244,7 @@ class listMagic
                 {
                     $data = $data->format('Y-m-d H:i:s');
                 }
-                if ($col['type'] == 'LINK')
+                if ($col['type'] == 'LINK' && isset($entity->{$col['link']}))
                 {
                     if (!$data)
                     {
