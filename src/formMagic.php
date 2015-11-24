@@ -284,7 +284,6 @@ class formMagic
         }
         else
         {
-            //$desc = translate('FM_' . $colum->getTableName() . '_' . $colum->getName());
             $desc = "";
         }
 

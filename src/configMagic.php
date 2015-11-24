@@ -96,45 +96,13 @@ class configMagic
         $this->html = $html;
     }
 
-    /**
-     * @return mixed
-     */
-    private function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
-     * @param mixed $options
-     */
-    private function setOptions($options)
-    {
-        $this->options = $options;
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getNames()
-    {
-        return $this->names;
-    }
-
-    /**
-     * @param mixed $names
-     */
-    private function setNames($names)
-    {
-        $this->names = $names;
-    }
-
-    function __construct(&$entity,$viewname='', $namesname='')
+    function __construct()
     {
         $this->setAdminMode(false);
     }
 
 
-    private function init(&$entity,$viewname='', $namesname='')
+    public function init(&$entity,$viewname='', $namesname='')
     {
         $this->demoshown = false;
         if (!$viewname)
@@ -186,7 +154,14 @@ class configMagic
         if (substr_count($qs,$this->viewname) && substr_count($qs,$this->namesname))
         {
             $this->demoshown = true;
-            $this->showConfig($entity);
+            if ($this->showConfig($entity))
+            {
+                if ($this->getWhatTypeAreWe() == 'form')
+                {
+                    $this->doForm($entity);
+                }
+            }
+
         }
     }
 
@@ -413,7 +388,7 @@ class configMagic
             }
             else
             {
-                die('Error: DDF33332');
+                throw new \Exception("Error: DDF33332");
             }
             $entitymap = $first_ob::TABLE_MAP;
             $entitymap = $entitymap::getTableMap();
@@ -493,7 +468,7 @@ class configMagic
             }
             else
             {
-                die('Error: DDF333555');
+                throw new \Exception('Error: DDF333555');
             }
         }
 

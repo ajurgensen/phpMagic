@@ -291,7 +291,7 @@ $(document).on(\'ready\', function() {
         $this->pw_array = $array;
         if (!$this->sessionCheck())
         {
-            exit;
+            throw new \Exception('Error: DFX3332');
         }
 
     }
@@ -347,7 +347,7 @@ $(document).on(\'ready\', function() {
         }
         else
         {
-            throw new Exception('PM: CSS for inclusion should be either file or URL');
+            throw new \Exception('PM: CSS for inclusion should be either file or URL');
 
         }
     }
@@ -374,7 +374,7 @@ $(document).on(\'ready\', function() {
         }
         else
         {
-            throw new Exception('PM: JS for inclusion should be either file or URL');
+            throw new \Exception('PM: JS for inclusion should be either file or URL');
 
         }
     }

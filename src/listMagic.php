@@ -86,10 +86,7 @@ class listMagic
         $this->setFromPropel(0);
         $this->html = '';
         $cols = array();
-        if (!count($entites))
-        {
-            //return;
-        } else
+        if (count($entites))
         {
             foreach ($entites as $first_ob)
             {
