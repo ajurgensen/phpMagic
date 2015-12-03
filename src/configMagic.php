@@ -168,7 +168,7 @@ class configMagic
 
     public static function newform(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
-        $form = new configMagic($entity,$viewname,$namesname);
+        $form = new configMagic();
         $form->setWhatTypeAreWe('form');
         $form->setAdminMode($adminEdit);
         $form->init($entity,$viewname,$namesname);
@@ -181,7 +181,7 @@ class configMagic
 
     public static function newlist(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
-        $list = new configMagic($entity,$viewname,$namesname);
+        $list = new configMagic();
         $list->setWhatTypeAreWe('list');
         $list->setAdminMode($adminEdit);
         $list->init($entity,$viewname,$namesname);
