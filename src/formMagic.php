@@ -610,7 +610,16 @@ class formMagic
             if (isset($_POST[$colum->getName()]))
             {
                 $value = $_POST[$colum->getName()];
-            } else
+            }
+            elseif (!$this->getFromPropel())
+            {
+                $name = 'get' . $colum->getName();
+                if (!$value = $entity->{$name}())
+                {
+                    $value = '';
+                }
+            }
+            else
             {
                 $name = 'get' . $colum->getPhpName();
                 if (!$value = $entity->{$name}())

@@ -37,6 +37,7 @@ class configMagic
     public $viewname;
     public $demoshown;
     public $namesname;
+    public $FromPropel;
     public $whatTypeAreWe;
     private $saved;
     private $adminMode;
@@ -166,9 +167,32 @@ class configMagic
     }
 
 
+
+    public static function convertDiyForm(diyForm $diyForm,$adminEdit=false,$viewname='', $namesname='')
+    {
+        $map = $diyForm->getMap();
+
+        $form = new configMagic($map,$viewname,$namesname);
+        $form->setWhatTypeAreWe('form');
+        $form->setAdminMode($adminEdit);
+        $form->init($map,$viewname,$namesname);
+        if (!$form->demoshown)
+        {
+            $form->doForm($map);
+        }
+        return($form);
+    }
+
+
+    public static function newdiyform($name = '')
+    {
+        $diyform = new diyForm($name);
+        return $diyform;
+    }
+
     public static function newform(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
-        $form = new configMagic();
+        $form = new configMagic($entity,$viewname,$namesname);
         $form->setWhatTypeAreWe('form');
         $form->setAdminMode($adminEdit);
         $form->init($entity,$viewname,$namesname);
@@ -181,7 +205,7 @@ class configMagic
 
     public static function newlist(&$entity,$adminEdit=false,$viewname='', $namesname='')
     {
-        $list = new configMagic();
+        $list = new configMagic($entity,$viewname,$namesname);
         $list->setWhatTypeAreWe('list');
         $list->setAdminMode($adminEdit);
         $list->init($entity,$viewname,$namesname);
@@ -396,9 +420,24 @@ class configMagic
         }
         elseif($this->getWhatTypeAreWe() == 'form')
         {
-            $entitymap = $entity::TABLE_MAP;
-            $entitymap = $entitymap::getTableMap();
-            $entityVirtualCols = $entity->getVirtualColumns();
+
+            $entityVirtualCols = array();
+            if (method_exists($entity,'toArray'))
+            {
+                //we are coming from a Propel Object
+                $map = $entity::TABLE_MAP;
+                $entitymap = $map::getTableMap();
+                $entityVirtualCols = $entity->getVirtualColumns();
+
+                $this->FromPropel = true;
+            }
+            else
+            {
+                //We are being build manually
+                $this->FromPropel = false;
+                $entitymap = $entity;
+
+            }
         }
 
         $loopHtmlBuilder = '';
