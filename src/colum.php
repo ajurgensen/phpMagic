@@ -29,7 +29,6 @@ namespace ajurgensen\phpMagic;
 class colum
 {
     var $name;
-    var $phpname;
     var $type;
     var $size;
 
@@ -75,29 +74,13 @@ class colum
         $this->type = $type;
     }
 
-    function __construct($name,$phpname,$type,$size=128)
+    function __construct($name,$type,$size=128)
     {
         $this->setName($name);
-        $this->setPhpName($phpname);
         $this->setType($type);
         $this->setSize($size);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPhpName()
-    {
-        return $this->phpname;
-    }
-
-    /**
-     * @param mixed $phpname
-     */
-    public function setPhpName($phpname)
-    {
-        $this->phpname = $phpname;
-    }
 
     /**
      * @return mixed

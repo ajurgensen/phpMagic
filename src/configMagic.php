@@ -103,7 +103,7 @@ class configMagic
     }
 
 
-    public function init(&$entity,$viewname='', $namesname='')
+    public function init(&$entity,$viewname='', $namesname='',$added_options=array())
     {
         $this->demoshown = false;
         if (!$viewname)
@@ -136,18 +136,19 @@ class configMagic
         if (!file_exists($this->viewFile))
         {
             $this->options = array();
-            $this->options['NAME'] = 'Name';
-            $this->options['OPTIONS']['hideback'] = false;
-            $this->options['DESC'] = $this->getNameFromEntityMap($entity);
-            $this->options['AUTOTRANSLATE'] = false;
-            $this->options['SLIMFORM'] = false;
-            $this->options['LINK'] = array();
-            $this->options['EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
+            $this->options['FM_NAME'] = 'Name';
+            $this->options['FM_OPTIONS']['hideback'] = false;
+            $this->options['FM_DESC'] = $this->getNameFromEntityMap($entity);
+            $this->options['FM_AUTOTRANSLATE'] = false;
+            $this->options['FM_SLIMFORM'] = false;
+            $this->options['FM_LINK'] = array();
+            $this->options['FM_EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
             $this->diskWriteOptions();
         }
         else
         {
             $this->diskReadOptions();
+            $this->options = array_merge($this->options, $added_options);
         }
 
         $qs = $_SERVER['QUERY_STRING'];
@@ -190,12 +191,12 @@ class configMagic
         return $diyform;
     }
 
-    public static function newform(&$entity,$adminEdit=false,$viewname='', $namesname='')
+    public static function newform(&$entity,$adminEdit=false,$viewname='', $namesname='',$options=array())
     {
-        $form = new configMagic($entity,$viewname,$namesname);
+        $form = new configMagic();
         $form->setWhatTypeAreWe('form');
         $form->setAdminMode($adminEdit);
-        $form->init($entity,$viewname,$namesname);
+        $form->init($entity,$viewname,$namesname,$options);
         if (!$form->demoshown)
         {
             $form->doForm($entity);
@@ -217,12 +218,12 @@ class configMagic
     private function proccessColum($columName,pageMagic $pm)
     {
         $map = new \ajurgensen\phpMagic\map($columName);
-        $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'Name', 'VARCHAR'));
-        $map->addColumn(new \ajurgensen\phpMagic\colum('Excluded', 'Excluded', 'BOOLEAN'));
-        $map->addColumn(new \ajurgensen\phpMagic\colum('LinkCol', 'LinkCol', 'VARCHAR'));
+        $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'VARCHAR'));
+        $map->addColumn(new \ajurgensen\phpMagic\colum('Excluded', 'BOOLEAN'));
+        $map->addColumn(new \ajurgensen\phpMagic\colum('LinkCol', 'VARCHAR'));
 
         $state = 0;
-        if (isset($this->options['EXCLUDE']) && in_array($columName, $this->options['EXCLUDE']))
+        if (isset($this->options['FM_EXCLUDE']) && in_array($columName, $this->options['FM_EXCLUDE']))
         {
             $state = 1;
         }
@@ -232,13 +233,13 @@ class configMagic
             $map->setName($this->names[$columName]);
         }
 
-        if (isset($this->options['LINK'][$columName]))
+        if (isset($this->options['FM_LINK'][$columName]))
         {
-            $map->setLinkCol($this->options['LINK'][$columName]);
+            $map->setLinkCol($this->options['FM_LINK'][$columName]);
         }
 
-        $editoptions['NAME'] = 'Editing ' . $columName;
-        $editoptions['DESC'] = '';
+        $editoptions['FM_NAME'] = 'Editing ' . $columName;
+        $editoptions['FM_DESC'] = '';
 
 
         $fm = new \ajurgensen\phpMagic\formMagic($map, $editoptions, array());
@@ -254,19 +255,21 @@ class configMagic
                 unset($this->names[$columName]);
             }
 
-            unset($this->options['LINK'][$columName]);
+            unset($this->options['FM_LINK'][$columName]);
             if ($map->staticVars['LinkCol'])
             {
-                $this->options['LINK'] = array_merge($this->options['LINK'], array($columName =>$map->staticVars['LinkCol']));
+                $this->options['FM_LINK'] = array_merge($this->options['FM_LINK'], array($columName =>$map->staticVars['LinkCol']));
             }
 
             if ($map->staticVars['Excluded'] == 1)
             {
-                array_push($this->options['EXCLUDE'], $columName);
+                array_push($this->options['FM_EXCLUDE'], $columName);
             } else
             {
-                $this->options['EXCLUDE'] = array_diff($this->options['EXCLUDE'], array($columName));
+                $this->options['FM_EXCLUDE'] = array_diff($this->options['FM_EXCLUDE'], array($columName));
             }
+
+
             $this->diskWriteOptions($this->options);
             $this->diskWriteNames($this->names);
             return false;
@@ -354,41 +357,41 @@ class configMagic
         {
             //General settings
             $map = new \ajurgensen\phpMagic\map('General Settings');
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'Name', 'VARCHAR'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Description', 'Description', 'VARCHAR'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('AutoTranslate', 'AutoTranslate', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('HideBack', 'HideBack', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('SlimForm', 'SlimForm', 'BOOLEAN'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'VARCHAR'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('Description', 'VARCHAR'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('AutoTranslate', 'BOOLEAN'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('HideBack', 'BOOLEAN'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('SlimForm', 'BOOLEAN'));
 
-            $map->setName($this->options['NAME']);
-            $map->setDescription($this->options['DESC']);
-            $map->setAutoTranslate($this->options['AUTOTRANSLATE']);
-            $map->setSlimForm($this->options['SLIMFORM']);
+            $map->setName($this->options['FM_NAME']);
+            $map->setDescription($this->options['FM_DESC']);
+            $map->setAutoTranslate($this->options['FM_AUTOTRANSLATE']);
+            $map->setSlimForm($this->options['FM_SLIMFORM']);
 
-            if (isset($this->options['OPTIONS']['hideback']))
+            if (isset($this->options['FM_OPTIONS']['hideback']))
             {
                 $map->setHideBack(1);
             }
 
             $editoptions = array();
-            $editoptions['NAME'] = 'General Settings';
-            $editoptions['DESC'] = '';
+            $editoptions['FM_NAME'] = 'General Settings';
+            $editoptions['FM_DESC'] = '';
 
             $fm = new \ajurgensen\phpMagic\formMagic($map, $editoptions, array());
 
             if ($fm->entitySaved)
             {
-                $this->options['NAME'] = $map->getName();
-                $this->options['DESC'] = $map->getDescription();
-                $this->options['AUTOTRANSLATE'] = $map->getAutoTranslate();
-                $this->options['SLIMFORM'] = $map->getSlimForm();
+                $this->options['FM_NAME'] = $map->getName();
+                $this->options['FM_DESC'] = $map->getDescription();
+                $this->options['FM_AUTOTRANSLATE'] = $map->getAutoTranslate();
+                $this->options['FM_SLIMFORM'] = $map->getSlimForm();
 
                 if ($map->getHideBack())
                 {
-                    $this->options['OPTIONS']['hideback'] = 1;
+                    $this->options['FM_OPTIONS']['hideback'] = 1;
                 } else
                 {
-                    unset($this->options['OPTIONS']['hideback']);
+                    unset($this->options['FM_OPTIONS']['hideback']);
                 }
 
                 $this->diskWriteOptions($this->options);
@@ -535,7 +538,7 @@ class configMagic
         $options = array();
         foreach ($this->options as $key => $value)
         {
-            $options['FM_' . $key] = $value;
+            $options[$key] = $value;
         }
         return $options;
     }

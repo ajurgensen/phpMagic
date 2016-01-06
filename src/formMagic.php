@@ -167,7 +167,7 @@ class formMagic
      */
     private function addFormElement($name,$formElement)
     {
-        if (isset($this->options['FM_OPTIONS']['autotranslate']))
+        if (isset($this->options['FM_AUTOTRANSLATE']) && $this->options['FM_AUTOTRANSLATE'])
         {
             $nicename = translate('FM_' . $name);
         }
@@ -270,15 +270,16 @@ class formMagic
     /**
      * @param $colum
      * @param $value
+     * @param string $JSValidaion
      * @return string
      */
-    private function addFormInputText($colum, $value,$options, $JSValidaion = '')
+    private function addFormInputText($colum, $value, $JSValidaion = '')
     {
-        if (isset($options['FM_DESCRIPTION'][$colum->getName()]))
+        if (isset($this->options['FM_DESCRIPTION'][$colum->getName()]))
         {
-            $desc = $options['FM_DESCRIPTION'][$colum->getName()];
+            $desc = $this->options['FM_DESCRIPTION'][$colum->getName()];
         }
-        elseif (isset($options['FM_OPTIONS']['autotranslate']))
+        elseif (isset($this->options['FM_OPTIONS']['autotranslate']))
         {
             $desc = translate('FM_DESC_' .$colum->getName());
         }
@@ -286,8 +287,6 @@ class formMagic
         {
             $desc = "";
         }
-
-
 
         $max = $colum->getSize();
         if ($max < 257)
@@ -299,7 +298,7 @@ class formMagic
             $html = '<textarea ' . $JSValidaion . ' placeholder="' . $desc . '" class="form-control" name="' . $colum->getName() . '" rows="4" cols="50">' . $value .  '</textarea>';
         }
 
-        $html = $this->addFormElement($colum->getPhpName(), $html);
+        $html = $this->addFormElement($colum->getName(), $html);
         return $html;
     }
 
@@ -377,6 +376,7 @@ class formMagic
      */
     private function handlePostEntity(&$entity, $map)
     {
+
         if (session_status() == PHP_SESSION_NONE)
         {
             session_start();
@@ -401,7 +401,7 @@ class formMagic
                     {
                         if ($error = call_user_func($function,$value,$entity->getId()))
                         {
-                            $errors[$colum->getPhpName()] =  $error  . '<br>';
+                            $errors[$colum->getName()] =  $error  . '<br>';
                         }
                     }
 
@@ -410,7 +410,7 @@ class formMagic
                     {
                         if (filter_var($value, FILTER_VALIDATE_EMAIL))
                         {
-                            $name = 'set' . $colum->getPhpName();
+                            $name = 'set' . $colum->getName();
                             $entity->{$name}($value);
                         } else
                         {
@@ -420,52 +420,53 @@ class formMagic
                                 $message = translate('FM_' . $this->formName . '_eml_er');
                             }
 
-                            $errors[$colum->getPhpName()] = $message . '<br>';
+                            $errors[$colum->getName()] = $message . '<br>';
                         }
                     } elseif ($colum->getType() == 'VARCHAR' && strlen($value) <= $colum->getSize() && is_string($value))
                     {
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         try
                         {
                             $entity->{$name}($value);
                         } catch (\Exception $e)
                         {
-                            $errors[$colum->getPhpName()] = "Unable to update " . $colum->getPhpName();
+                            $errors[$colum->getName()] = "Unable to update " . $colum->getName();
                          }
                     }
                     elseif ($colum->getType() == 'FLOAT' && (is_numeric($value) || is_float($value)))
                     {
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
                     {
+                        //TODO
                         $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'TINYINT' && is_numeric($value) && $value < 256)
                     {
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     } elseif ($colum->getType() == 'BOOLEAN' && ($value == 1 || $value == 0))
                     {
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'TIMESTAMP')
                     {
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'ENUM')
                     {
                         $valueset = $colum->getValueSet();
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($valueset[$value]);
                     }
                     else
                     {
-                        $errors[$colum->getPhpName()] = "Error: " . $colum->getPhpName();
+                        $errors[$colum->getName()] = "Error: " . $colum->getName();
                     }
                 }
             }
@@ -621,6 +622,7 @@ class formMagic
             }
             else
             {
+                //TODO - phpname only needed for a few cases
                 $name = 'get' . $colum->getPhpName();
                 if (!$value = $entity->{$name}())
                 {
@@ -628,9 +630,14 @@ class formMagic
                 }
             }
             //If we have a Name override use it
-            if (isset($names[$colum->getName()]) && $newname = $names[$colum->getName()])
+            if (isset($names[$colum->getName()]))
             {
-                $colum->setPhpName($newname);
+                //We got it!
+                $newname = $names[$colum->getName()];
+            }
+            else
+            {
+                $newname = $colum->getName();
             }
 
             //Ok, start the colunm processing
@@ -641,7 +648,7 @@ class formMagic
             elseif (isset($options[$colum->getName()]))
             {
                 //We are have custom Optionset for this one
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $options[$colum->getName()], $value);
+                $html .= $this->addFormSelect($newname, $colum->getName(), $options[$colum->getName()], $value);
             }
             elseif ($this->getFromPropel() && $colum->isForeignKey())
             {
@@ -672,20 +679,20 @@ class formMagic
                     }
                     if (!isset($newname))
                     {
-                        $colum->setPhpName($colum->getRelatedTableName());
+                        $newname = ($colum->getRelatedTableName());
                     }
                 }
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), $optionarray, $value);
+                $html .= $this->addFormSelect($newname, $colum->getName(), $optionarray, $value);
             }
             elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
             {
                 //We have an email field
-                $html .= $this->addFormInputText($colum, $value, $options, ' type="email" data-parsley-trigger="change" required ');
+                $html .= $this->addFormInputText($colum, $value, ' type="email" data-parsley-trigger="change" required ');
             }
             elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
             {
                 //We have an PASSWORD field
-                $html .= $this->addFormInputText($colum, $value, $options, ' type="password" data-parsley-trigger="change" required ');
+                $html .= $this->addFormInputText($colum, $value, ' type="password" data-parsley-trigger="change" required ');
             }
             elseif ($colum->getType() == 'VARCHAR')
             {
@@ -694,7 +701,16 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, $options, ' data-parsley-trigger="change" '. $require .' ');
+                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+            }
+            elseif ($colum->getType() == 'TINYINT')
+            {
+                //Tinyfucker
+                $require = '';
+                if ($this->fromPropel && $colum->isNotNull())
+                {$require = 'required';}
+
+                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'FLOAT')
             {
@@ -703,7 +719,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, $options, ' type="number" step="0.01" data-parsley-trigger="change" '. $require .' ');
+                $html .= $this->addFormInputText($colum, $value, ' type="number" step="0.01" data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'BOOLEAN')
             {
@@ -716,7 +732,7 @@ class formMagic
                     $yes = translate('FM_' . $this->formName . '_true');
                     $no = translate('FM_' . $this->formName . '_false');
                 }
-                $html .= $this->addFormSelect($colum->getPhpName(), $colum->getName(), array(0 => $no, 1 => $yes), $value);
+                $html .= $this->addFormSelect($newname, $colum->getName(), array(0 => $no, 1 => $yes), $value);
             }
             elseif ($colum->getType() == 'TIMESTAMP')
             {
@@ -724,14 +740,14 @@ class formMagic
                 {
                     $value = new \DateTime();
                 }
-                $html .= $this->addDateTimePicker($colum->getPhpName(),$colum->getName(),$value);
+                $html .= $this->addDateTimePicker($newname,$colum->getName(),$value);
 
             }
             elseif ($colum->getType() == 'ENUM')
             {
                 $selectedValueCode = array_search($value,$colum->getValueSet());
 
-                $html .= $this->addFormSelect($colum->getPhpName(),$colum->getName(),$colum->GetValueSet(),$selectedValueCode);
+                $html .= $this->addFormSelect($newname,$colum->getName(),$colum->GetValueSet(),$selectedValueCode);
             }
             elseif ($debug)
             {

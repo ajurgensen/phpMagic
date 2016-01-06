@@ -21,17 +21,15 @@ class diyForm
         return $this->map;
     }
 
-    public function addText($name,$desc,$size=128,$value='')
+    public function addText($name,$size=128,$value='')
     {
-        // EVIL HACK - name <-> desc
-        $col = new colum($name,$desc,$size);
+        $col = new colum($name,$size);
         $this->map->addColumn($col);
     }
 
-    public function addBoolean($name,$desc,$value=false)
+    public function addBoolean($name,$value=false)
     {
-        // EVIL HACK - name <-> desc
-        $col = new colum($name,$desc,'BOOLEAN');
+        $col = new colum($name,'BOOLEAN');
         $this->map->addColumn($col);
         $this->map->{'set'.$name}($value);
     }
@@ -46,7 +44,7 @@ class diyForm
 
         if (!isset($this->map->{'get' . $value}))
         {
-            return ($this->map->{'get' . $value});
+            return ($this->map->staticVars[$value]);
         }
     }
 }
