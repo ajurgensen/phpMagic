@@ -26,6 +26,8 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
+use League\Flysystem\Exception;
+
 class formMagic
 {
     var $entitySaved;
@@ -78,18 +80,21 @@ class formMagic
         $this->names = $names;
         $this->options = $options;
 
-        if (method_exists($entity,'toArray'))
+
+
+        //if (method_exists($entity,'toArray'))
+        if (method_exists($entity,'configMagic'))
         {
-            //we are coming from a Propel Object
-            $map = $entity::TABLE_MAP;
-            $map = $map::getTableMap();
-            $this->setFromPropel(1);
+            //configMagicDIY form
+            $this->setFromPropel(0);
+            $map = $entity;
         }
         else
         {
-            //We are being build manually
-            $this->setFromPropel(0);
-            $map = $entity;
+            //we are coming from a Propel Object - Or so we assume
+            $map = $entity::TABLE_MAP;
+            $map = $map::getTableMap();
+            $this->setFromPropel(1);
         }
 
         //Get name, nicename and Desc for the form
@@ -127,6 +132,20 @@ class formMagic
             if (1==1 || $this->getFromPropel())
             {
                 $errors = $this->handlePostEntity($entity, $map);
+
+                if (!count($errors) && method_exists($entity,'validate'))
+                {
+                    $validationResult = $entity->validate();
+                    if ($validationResult === true)
+                    {
+                        //We validate
+                    }
+                    else
+                    {
+                        $errors['Password'] = $validationResult;
+                    }
+                }
+
                 if (!count($errors))
                 {
                     $entity->save();
@@ -169,6 +188,10 @@ class formMagic
     {
         if (isset($this->options['FM_AUTOTRANSLATE']) && $this->options['FM_AUTOTRANSLATE'])
         {
+            if (!function_exists('translate'))
+            {
+                throw new \Exception('You must Implement the "translate" function as global to use Autotranslate');
+            }
             $nicename = translate('FM_' . $name);
         }
         else
@@ -645,7 +668,8 @@ class formMagic
             {
                 //We were blacklisted
             }
-            elseif (isset($options[$colum->getName()]))
+            //name hack
+            elseif (isset($options[$colum->getName()]) && $colum->getName() !== 'NAME')
             {
                 //We are have custom Optionset for this one
                 $html .= $this->addFormSelect($newname, $colum->getName(), $options[$colum->getName()], $value);

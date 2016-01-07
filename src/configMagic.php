@@ -185,9 +185,9 @@ class configMagic
     }
 
 
-    public static function newdiyform($name = '')
+    public static function newdiyform($name = '',$validationClosure='')
     {
-        $diyform = new diyForm($name);
+        $diyform = new diyForm($name,$validationClosure);
         return $diyform;
     }
 

@@ -28,45 +28,15 @@ namespace ajurgensen\phpMagic;
 
 class map
 {
-    var $columns;
-    var $name;
-    var $staticVars;
-    private $pw_array;
+    public $columns;
+    public $staticVars;
+    private $validationClosure;
 
-    /**
-     * @param mixed $pw_array
-     */
-    public function setPwArray($pw_array)
+    public function validate()
     {
-        $this->pw_array = $pw_array;
-    }
-
-    private function validate_credentials($username,$password)
-    {
-        if (isset($this->pw_array[$username]) && $this->pw_array[$username] == $password)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    function validates($name,$value)
-    {
-        if (1==1)
-        {
-            return true;
-        }
-        elseif ($name == 'name' && $value == 'value')
-        {
-            return true;
-        }
-        else
-        {
-            return "extend class with some logic";
-        }
+        $validationClosure = $this->validationClosure;
+        $validationResult = $validationClosure($this->staticVars);
+        return $validationResult;
     }
 
     function save(){}
@@ -87,13 +57,8 @@ class map
         {
             $name = substr($func,3);
             $this->staticVars[$name] = $params[0];
-        }
-        $out = $this->validates($name,$params[0]);
-        if ($out === true)
-        {
             return true;
         }
-        return $out;
     }
 
     function feedArray($array)
@@ -105,10 +70,22 @@ class map
         }
     }
 
-    function __construct($name)
+    function __construct($name,$validationClosure = '')
     {
         $this->setObjectName($name);
         $this->columns = array();
+        if ($validationClosure)
+        {
+            $this->validationClosure = $validationClosure;
+        }
+        else
+        {
+            $this->validationClosure = function()
+            {
+              return true;
+            };
+
+        }
     }
 
     /**
@@ -125,5 +102,10 @@ class map
     public function addColumn($column)
     {
         array_push($this->columns,$column);
+    }
+
+    public function configMagic()
+    {
+        return true;
     }
 }

@@ -28,9 +28,7 @@ namespace ajurgensen\phpMagic;
 
 class colum
 {
-    var $name;
-    var $type;
-    var $size;
+    private $staticVars;
 
     public function isPrimaryKey()
     {
@@ -42,38 +40,6 @@ class colum
         return false;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getSize()
-    {
-        return $this->size;
-    }
-
-    /**
-     * @param mixed $size
-     */
-    public function setSize($size)
-    {
-        $this->size = $size;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param mixed $type
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-    }
-
     function __construct($name,$type,$size=128)
     {
         $this->setName($name);
@@ -81,20 +47,23 @@ class colum
         $this->setSize($size);
     }
 
-
-    /**
-     * @return mixed
-     */
-    public function getName()
+    function __call($func, $params)
     {
-        return $this->name;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
+        if (substr($func,0,3) == 'get')
+        {
+            $name = substr($func,3);
+            if (isset($this->staticVars[$name]))
+            {return $this->staticVars[$name];}
+            else
+            {
+                return false;
+            }
+        }
+        if (substr($func,0,3) == 'set')
+        {
+            $name = substr($func,3);
+            $this->staticVars[$name] = $params[0];
+            return true;
+        }
     }
 }
