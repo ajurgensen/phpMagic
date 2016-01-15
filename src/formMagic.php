@@ -98,7 +98,7 @@ class formMagic
         }
 
         //Get name, nicename and Desc for the form
-        if (isset($options['FM_NAME']))
+        if (isset($options['FM_NAME']) && $options['FM_NAME'])
         {
             $this->formNiceName =$options['FM_NAME'];
         }
@@ -115,7 +115,7 @@ class formMagic
             $this->formNiceName = get_class($entity);
         }
 
-        $this->formName= $this->cleanString($this->formNiceName);
+        $this->formName = $this->cleanString($this->formNiceName);
 
         if (isset($options['FM_DESC']))
         {
