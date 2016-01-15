@@ -141,6 +141,7 @@ class configMagic
             $this->options['FM_DESC'] = $this->getNameFromEntityMap($entity);
             $this->options['FM_AUTOTRANSLATE'] = false;
             $this->options['FM_SLIMFORM'] = false;
+            $this->options['FM_SENDTEXT'] = false;
             $this->options['FM_LINK'] = array();
             $this->options['FM_EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
             $this->diskWriteOptions();
@@ -362,11 +363,15 @@ class configMagic
             $map->addColumn(new \ajurgensen\phpMagic\colum('AutoTranslate', 'BOOLEAN'));
             $map->addColumn(new \ajurgensen\phpMagic\colum('HideBack', 'BOOLEAN'));
             $map->addColumn(new \ajurgensen\phpMagic\colum('SlimForm', 'BOOLEAN'));
+            $map->addColumn(new \ajurgensen\phpMagic\colum('SendText', 'VARCHAR'));
+
 
             $map->setName($this->options['FM_NAME']);
             $map->setDescription($this->options['FM_DESC']);
             $map->setAutoTranslate($this->options['FM_AUTOTRANSLATE']);
             $map->setSlimForm($this->options['FM_SLIMFORM']);
+            if (isset($this->options['FM_SENDTEXT'])) $map->setSendText($this->options['FM_SENDTEXT']);
+
 
             if (isset($this->options['FM_OPTIONS']['hideback']))
             {
@@ -385,6 +390,7 @@ class configMagic
                 $this->options['FM_DESC'] = $map->getDescription();
                 $this->options['FM_AUTOTRANSLATE'] = $map->getAutoTranslate();
                 $this->options['FM_SLIMFORM'] = $map->getSlimForm();
+                $this->options['FM_SENDTEXT'] = $map->getSendText();
 
                 if ($map->getHideBack())
                 {

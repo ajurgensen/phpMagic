@@ -200,7 +200,7 @@ class formMagic
         }
         $html = '';
 
-        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        if (1==1 || !isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
         {
             $html = '<li class="list-group-item"><div class="row">';
             $html .= '<div class="col-xs-5">';
@@ -210,7 +210,7 @@ class formMagic
         }
 
         $html .= $formElement;
-        if (!isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
+        if (1==1 || !isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
         {
             $html .= '</div>';
             $html .= '</div></li>';
@@ -230,6 +230,10 @@ class formMagic
             $html = '<div class="panel panel-default">';
             $html .= '<div class="panel-heading"><strong>' . $this->formNiceName . '</strong></div>';
             $html .= '<div class="panel-body"><p>' . $this->formDesc . '</p></div>';
+        }
+        else
+        {
+            $html .= '<div>';
         }
 
         $html .= '<ul class="list-group">';
@@ -252,7 +256,15 @@ class formMagic
         $_SESSION[$this->formName] = $rnd;
 
         $back = 'Back';
-        $send = 'Send';
+        if (isset($this->options['FM_SENDTEXT']))
+        {
+            $send = $this->options['FM_SENDTEXT'];
+        }
+        else
+        {
+            $send = 'Send';
+        }
+
         if (isset($this->options['FM_OPTIONS']['autotranslate']))
         {
             $back = translate('FM_' . $this->formName . '_back');
@@ -287,6 +299,7 @@ class formMagic
         {
             $html .= '</div>';
         }
+
         return($html);
     }
 
