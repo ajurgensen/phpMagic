@@ -133,24 +133,24 @@ class configMagic
             $this->diskReadNames();
         }
 
-        if (!file_exists($this->viewFile))
-        {
-            $this->options = array();
-            $this->options['FM_NAME'] = 'Name';
-            $this->options['FM_OPTIONS']['hideback'] = false;
-            $this->options['FM_DESC'] = $this->getNameFromEntityMap($entity);
-            $this->options['FM_AUTOTRANSLATE'] = false;
-            $this->options['FM_SLIMFORM'] = false;
-            $this->options['FM_SENDTEXT'] = false;
-            $this->options['FM_LINK'] = array();
-            $this->options['FM_EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
-            $this->diskWriteOptions();
-        }
-        else
+
+        $this->options = array();
+        $this->options['FM_NAME'] = 'Name';
+        $this->options['FM_OPTIONS']['hideback'] = false;
+        $this->options['FM_DESC'] = $this->getNameFromEntityMap($entity);
+        $this->options['FM_AUTOTRANSLATE'] = false;
+        $this->options['FM_SLIMFORM'] = false;
+        $this->options['FM_SENDTEXT'] = 'Send';
+        $this->options['FM_LINK'] = array();
+        $this->options['FM_EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
+        $this->diskWriteOptions();
+
+        if (file_exists($this->viewFile))
         {
             $this->diskReadOptions();
-            $this->options = array_merge($this->options, $added_options);
         }
+
+        $this->options = array_merge($this->options, $added_options);
 
         $qs = $_SERVER['QUERY_STRING'];
 
@@ -356,55 +356,33 @@ class configMagic
 
         if ($this->getWhatTypeAreWe() == 'form')
         {
+
             //General settings
-            $map = new \ajurgensen\phpMagic\map('General Settings');
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Name', 'VARCHAR'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('Description', 'VARCHAR'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('AutoTranslate', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('HideBack', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('SlimForm', 'BOOLEAN'));
-            $map->addColumn(new \ajurgensen\phpMagic\colum('SendText', 'VARCHAR'));
+            $diyform = configMagic::newdiyform('General Settings');
+            $diyform->addText('FormName',128,$this->options['FM_NAME']);
+            $diyform->addText('Description',512,$this->options['FM_DESC']);
+            $diyform->addBoolean('AutoTranslate',$this->options['FM_AUTOTRANSLATE']);
+            $diyform->addBoolean('HideBack',$this->options['FM_OPTIONS']['hideback']);
+            $diyform->addBoolean('SlimForm',$this->options['FM_SLIMFORM']);
+            $diyform->addText('SendText',128,$this->options['FM_SENDTEXT']);
 
 
-            $map->setName($this->options['FM_NAME']);
-            $map->setDescription($this->options['FM_DESC']);
-            $map->setAutoTranslate($this->options['FM_AUTOTRANSLATE']);
-            $map->setSlimForm($this->options['FM_SLIMFORM']);
-            if (isset($this->options['FM_SENDTEXT'])) $map->setSendText($this->options['FM_SENDTEXT']);
+            $form = configMagic::convertDiyForm($diyform,false,'diyFormSettingsView','diyFormSettingsName');
 
-
-            if (isset($this->options['FM_OPTIONS']['hideback']))
+            if ($form->saved())
             {
-                $map->setHideBack(1);
-            }
-
-            $editoptions = array();
-            $editoptions['FM_NAME'] = 'General Settings';
-            $editoptions['FM_DESC'] = '';
-
-            $fm = new \ajurgensen\phpMagic\formMagic($map, $editoptions, array());
-
-            if ($fm->entitySaved)
-            {
-                $this->options['FM_NAME'] = $map->getName();
-                $this->options['FM_DESC'] = $map->getDescription();
-                $this->options['FM_AUTOTRANSLATE'] = $map->getAutoTranslate();
-                $this->options['FM_SLIMFORM'] = $map->getSlimForm();
-                $this->options['FM_SENDTEXT'] = $map->getSendText();
-
-                if ($map->getHideBack())
-                {
-                    $this->options['FM_OPTIONS']['hideback'] = 1;
-                } else
-                {
-                    unset($this->options['FM_OPTIONS']['hideback']);
-                }
+                $this->options['FM_NAME'] = $diyform->getValue('FormName');
+                $this->options['FM_DESC'] = $diyform->getValue('Description');
+                $this->options['FM_AUTOTRANSLATE'] = $diyform->getValue('AutoTranslate');
+                $this->options['FM_SLIMFORM'] = $diyform->getValue('SlimForm');
+                $this->options['FM_SENDTEXT'] = $diyform->getValue('SendText');
+                $this->options['FM_OPTIONS']['hideback'] = $diyform->getValue('HideBack');
 
                 $this->diskWriteOptions($this->options);
                 return (true);
             }
 
-            $settingsHtml .= $pm->getPanel($fm->html, 'General');
+            $settingsHtml .= $pm->getPanel($form->getHtml(), 'General');
         }
 
 
