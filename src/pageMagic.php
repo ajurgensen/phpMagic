@@ -40,6 +40,7 @@ class pageMagic
     public $JSfile;
     public $CSSfile;
     private $needFileReWrite;
+    private $validationClosure;
 
     public static function staticTest()
     {
@@ -144,14 +145,15 @@ $(document).on(\'ready\', function() {
 
     private function doLogin()
     {
-        $options = $names = array();
-        $data = array(array('LOGIN', "Login", "VARCHAR"), array('PASSWORD', "Password", "VARCHAR"));
 
-        $map = new \ajurgensen\phpMagic\map('Login');
-        $map->feedArray($data);
-        $map->setPwArray($this->pw_array);
-        $fm = new formMagic($map, $options, $names);
-        if ($fm->entitySaved)
+        $diyform = configMagic::newdiyform('Login',$this->validationClosure);
+
+        $diyform->addText('Login');
+        $diyform->addText('PASSWORD');
+
+        $form = configMagic::convertDiyForm($diyform,false);
+
+        if ($form->saved())
         {
             //Form was returned and server side validated
             setcookie('pm_session',$this->sessionForUser(),null,'/');
@@ -160,7 +162,7 @@ $(document).on(\'ready\', function() {
         else
         {
             //Form not returned, echo login HTML and return false
-            $this->addHtml($fm->html);
+            $this->addHtml($form->getHtml());
             $this->finalize();
             return false;
         }
@@ -286,12 +288,29 @@ $(document).on(\'ready\', function() {
     }
 
 
-    public function addPWArray($array)
+    public function validate($validationClosure)
     {
-        $this->pw_array = $array;
+
+        try
+        {
+            $reflection = new \ReflectionFunction($validationClosure);
+        }
+        catch (\Exception $e)
+        {
+            throw new \Exception('Validate not called with Closure');
+
+        }
+
+        if (!$reflection->isClosure())
+        {
+            throw new \Exception('Validate not called with Closure');
+        }
+
+        $this->validationClosure = $validationClosure;
+
         if (!$this->sessionCheck())
         {
-            throw new \Exception('Error: DFX3332');
+            throw new \Exception('NOT_LOGGED_IN');
         }
 
     }

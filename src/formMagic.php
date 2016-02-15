@@ -26,8 +26,6 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
-use League\Flysystem\Exception;
-
 class formMagic
 {
     var $entitySaved;
@@ -681,6 +679,10 @@ class formMagic
             {
                 //We were blacklisted
             }
+            elseif (in_array($colum->getName(), array('id','ID')))
+            {
+                //Trying to detect ID col
+            }
             //name hack
             elseif (isset($options[$colum->getName()]) && $colum->getName() !== 'NAME')
             {
@@ -734,6 +736,15 @@ class formMagic
             elseif ($colum->getType() == 'VARCHAR')
             {
                 //normal Varchar
+                $require = '';
+                if ($this->fromPropel && $colum->isNotNull())
+                {$require = 'required';}
+
+                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+            }
+            elseif ($colum->getType() == 'INTEGER')
+            {
+                //Int
                 $require = '';
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
