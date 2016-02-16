@@ -182,20 +182,8 @@ class formMagic
      * @param $value
      * @return string
      */
-    private function addFormElement($name,$formElement)
+    private function addFormElement($nicename, $name,$formElement)
     {
-        if (isset($this->options['FM_AUTOTRANSLATE']) && $this->options['FM_AUTOTRANSLATE'])
-        {
-            if (!function_exists('translate'))
-            {
-                throw new \Exception('You must Implement the "translate" function as global to use Autotranslate');
-            }
-            $nicename = translate('FM_' . $name);
-        }
-        else
-        {
-            $nicename = $name;
-        }
         $html = '';
 
         if (1==1 || !isset($this->options['FM_SLIMFORM']) || $this->options['FM_SLIMFORM'] == 0)
@@ -307,7 +295,7 @@ class formMagic
      * @param string $JSValidaion
      * @return string
      */
-    private function addFormInputText($colum, $value, $JSValidaion = '')
+    private function addFormInputText($nicename,$colum, $value, $JSValidaion = '')
     {
         if (isset($this->options['FM_DESCRIPTION'][$colum->getName()]))
         {
@@ -332,7 +320,7 @@ class formMagic
             $html = '<textarea ' . $JSValidaion . ' placeholder="' . $desc . '" class="form-control" name="' . $colum->getName() . '" rows="4" cols="50">' . $value .  '</textarea>';
         }
 
-        $html = $this->addFormElement($colum->getName(), $html);
+        $html = $this->addFormElement($nicename,$colum->getName(), $html);
         return $html;
     }
 
@@ -345,7 +333,7 @@ class formMagic
                 $('#datetimepicker". $nicename ."').datetimepicker();
             });
         </script>";
-        $html = $this->addFormElement($nicename,$html);
+        $html = $this->addFormElement($nicename,$name,$html);
         return $html;
     }
 
@@ -369,7 +357,7 @@ class formMagic
             $html .= '<option ' . $sel . ' value="' . $key .'">' . $value . '</option>';
         }
         $html .="</select>";
-        $html = $this->addFormElement($nicename,$html);
+        $html = $this->addFormElement($nicename,$name,$html);
         return $html;
     }
     /**
@@ -400,7 +388,7 @@ class formMagic
             $html .= '<option ' . $sel . ' value="' . $key .'">' . $value . '</option>';
         }
         $html .="</select>";
-        $html = $this->addFormElement($nicename,$html);
+        $html = $this->addFormElement($nicename,$name,$html);
         return $html;
     }
 
@@ -669,6 +657,14 @@ class formMagic
                 //We got it!
                 $newname = $names[$colum->getName()];
             }
+            elseif (isset($this->options['FM_AUTOTRANSLATE']) && $this->options['FM_AUTOTRANSLATE'])
+            {
+                if (!function_exists('translate'))
+                {
+                    throw new \Exception('You must Implement the "translate" function as global to use Autotranslate');
+                }
+                $newname = translate('FM_' . $colum->getName());
+            }
             else
             {
                 $newname = $colum->getName();
@@ -726,12 +722,12 @@ class formMagic
             elseif (substr_count($colum->getName(), 'EMAIL') && $colum->getType() == 'VARCHAR')
             {
                 //We have an email field
-                $html .= $this->addFormInputText($colum, $value, ' type="email" data-parsley-trigger="change" required ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' type="email" data-parsley-trigger="change" required ');
             }
             elseif (substr_count($colum->getName(), 'PASSWORD') && $colum->getType() == 'VARCHAR')
             {
                 //We have an PASSWORD field
-                $html .= $this->addFormInputText($colum, $value, ' type="password" data-parsley-trigger="change" required ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' type="password" data-parsley-trigger="change" required ');
             }
             elseif ($colum->getType() == 'VARCHAR')
             {
@@ -740,7 +736,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'INTEGER')
             {
@@ -749,7 +745,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'TINYINT')
             {
@@ -758,7 +754,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'FLOAT')
             {
@@ -767,7 +763,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($colum, $value, ' type="number" step="0.01" data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' type="number" step="0.01" data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'BOOLEAN')
             {
@@ -800,7 +796,7 @@ class formMagic
             elseif ($debug)
             {
                 //Give hits in debug mode
-                $html .= $this->addFormElement($colum->getName(), 'Debug - Add ' . $colum->getName());
+                $html .= $this->addFormElement($newname,$colum->getName(), 'Debug - Add ' . $colum->getName());
             }
         }
         return $html;
@@ -842,7 +838,7 @@ class formMagic
             }
 
             $addhtml = "<input size=32 data-parsley-trigger='change' required placeholder='" . $nicename . "' class='form-control' value='" . $value . "' type='". $type ."' name='" . $name . "'>";
-            $html .= $this->addFormElement($nicename, $addhtml);
+            $html .= $this->addFormElement($nicename, $name,$addhtml);
 
 
         }

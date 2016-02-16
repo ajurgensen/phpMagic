@@ -143,7 +143,6 @@ class configMagic
         $this->options['FM_SENDTEXT'] = 'Send';
         $this->options['FM_LINK'] = array();
         $this->options['FM_EXCLUDE'] = array('created_at', 'updated_at', 'version', 'user_id', 'CREATED_AT', 'UPDATED_AT', 'VERSION', 'USER_ID');
-        $this->diskWriteOptions();
 
         if (file_exists($this->viewFile))
         {

@@ -151,7 +151,7 @@ $(document).on(\'ready\', function() {
         $diyform->addText('Login');
         $diyform->addText('PASSWORD');
 
-        $form = configMagic::convertDiyForm($diyform,false);
+        $form = configMagic::convertDiyForm($diyform,false,'pm_login_FormView','pm_login_FormName');
 
         if ($form->saved())
         {
