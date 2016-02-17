@@ -96,7 +96,14 @@ class listMagic
         }
 
         $nolinking = 0;
-        if (isset($entity))
+        //if (method_exists($entity,'toArray'))
+        if (method_exists($entity,'configMagic'))
+        {
+            //configMagicDIY form
+            $this->setFromPropel(0);
+            $map = $entity;
+        }
+        else
         {
             $map = $entity::TABLE_MAP;
             $map = $map::getTableMap();
@@ -294,8 +301,9 @@ class listMagic
 
                 }
 
-                $dataarray[] = $fieldarray;
             }
+            $dataarray[] = $fieldarray;
+
         }
 
 
