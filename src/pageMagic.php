@@ -41,6 +41,7 @@ class pageMagic
     public $CSSfile;
     private $needFileReWrite;
     private $validationClosure;
+    public $authenticatedId;
 
     public static function staticTest()
     {
@@ -54,10 +55,20 @@ class pageMagic
 
     private function sessionCheck()
     {
-        if (isset($_COOKIE['pm_session']) && $_COOKIE['pm_session'] == $this->sessionForUser())
+        session_start();
+
+        if
+        (
+            isset($_SESSION['fingerprint']) && isset($_SESSION['intiated']) && isset($_SESSION['authenticatedId']) &&
+            $_SESSION['fingerprint'] == $this->sessionForUser() &&
+            is_int($_SESSION['intiated']) &&
+            time() - $_SESSION['intiated'] < 60 * 60 * 24 * 7 &&
+            $this->authenticatedId = $_SESSION['authenticatedId']
+        )
         {
             return true;
         }
+
         if ($this->doLogin())
         {
             return true;
@@ -156,7 +167,9 @@ $(document).on(\'ready\', function() {
         if ($form->saved())
         {
             //Form was returned and server side validated
-            setcookie('pm_session',$this->sessionForUser(),null,'/');
+            $_SESSION['fingerprint'] = $this->sessionForUser();
+            $_SESSION['intiated'] = time();
+            $_SESSION['authenticatedId'] = $this->authenticatedId;
             return true;
         }
         else
@@ -290,7 +303,6 @@ $(document).on(\'ready\', function() {
 
     public function validate($validationClosure)
     {
-
         try
         {
             $reflection = new \ReflectionFunction($validationClosure);

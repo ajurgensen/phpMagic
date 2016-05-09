@@ -43,9 +43,9 @@ class chartMagic
         $this->intName = $this->chartName . rand(1000,9999);
     }
 
-    public function getChartHTML()
+    public function getChartHTML($width=500,$height=300)
     {
-        $html = '<div id="'. $this->intName  .'" style="width: 500px;height: 300px;"></div>';
+        $html = '<div id="'. $this->intName  .'" style="width: '.$width.'px;height: '. $height.'px;"></div>';
 
 
         $html .= '<script>$(document).ready(
