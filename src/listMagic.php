@@ -26,9 +26,9 @@ SOFTWARE.
 
 namespace ajurgensen\phpMagic;
 
-
 /**
  * Class listMagic
+ *
  * @package ajurgensen\phpMagic
  */
 class listMagic
@@ -58,6 +58,7 @@ class listMagic
     {
         $this->html .= $html;
     }
+
     public function getHTML()
     {
         return $this->html;
@@ -66,12 +67,13 @@ class listMagic
     private function propelFormatColName($colname)
     {
         $newname = '';
-        $parts = explode('_',$colname);
-        foreach($parts as $part)
+        $parts = explode('_', $colname);
+        foreach ($parts as $part)
         {
             $newname .= strtolower(ucfirst($part));
         }
-        return($newname);
+
+        return ($newname);
 
     }
 
@@ -79,7 +81,7 @@ class listMagic
      * @param Array $entites Collection of entities to be listed. Could be a list of Propel Objects
      * @param Array $options LM_LINK LM_EXCLUDE LM_DESCRIPTION LM_NAME LM_ADDNEW LM_DONTSORT
      */
-    function __construct($entites=array(),$options=array(),$names = array())
+    function __construct($entites = array(), $options = array(), $names = array())
     {
         $this->options = $options;
         $this->HTMLready = true;
@@ -97,13 +99,13 @@ class listMagic
 
         $nolinking = 0;
         //if (method_exists($entity,'toArray'))
-        if (isset($entity) && method_exists($entity,'configMagic'))
+        if (isset($entity) && method_exists($entity, 'configMagic'))
         {
             //configMagicDIY form
             $this->setFromPropel(0);
             $map = $entity;
         }
-        elseif(isset($entity))
+        elseif (isset($entity))
         {
             $map = $entity::TABLE_MAP;
             $map = $map::getTableMap();
@@ -115,7 +117,7 @@ class listMagic
         $linkarray = array();
         if (isset($this->options['LM_LINK']) && is_array($this->options['LM_LINK']))
         {
-            foreach ($this->options['LM_LINK'] as $key=>$value)
+            foreach ($this->options['LM_LINK'] as $key => $value)
             {
                 $linkarray[$key] = $value;
             }
@@ -124,7 +126,6 @@ class listMagic
         {
             $nolinking = 1;
         }
-
 
         //Image col
         if (isset($this->options['LM_IMAGE']))
@@ -196,9 +197,15 @@ class listMagic
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'VARCHAR';
                 }
+                elseif ($colum->getType() == 'BOOLEAN')
+                {
+                    //Timestamp field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'BOOLEAN';
+                }
             }
         }
-
 
         $headers = array();
         $dataarray = array();
@@ -218,7 +225,8 @@ class listMagic
                     elseif (isset($options['LM_DESCRIPTION'][$col['headername']]))
                     {
                         $headers[$col['headername']] = $options['LM_DESCRIPTION'][$col['headername']];
-                    } else
+                    }
+                    else
                     {
                         $headers[$col['headername']] = $col['headername'];
                     }
@@ -233,14 +241,22 @@ class listMagic
                     {
                         $data = $remoteEntity->getName();
                     }
-                } elseif ($col['type'] == 'IMAGE')
+                }
+                elseif ($col['type'] == 'IMAGE')
                 {
                     $data = '<a href="#" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
 
-                } elseif ($col['type'] == 'IMAGELINK')
+                }
+                elseif ($col['type'] == 'BOOLEAN')
+                {
+                    $data = 'No';
+                    if ($entity->{$col['getdatastring']}()) $data = 'Yes';
+                }
+                elseif ($col['type'] == 'IMAGELINK')
                 {
                     $data = '<a href="' . $entity->{$col['link']} . '" class="thumbnail"><img width="100" src=' . $entity->{$col['getdatastring']} . '></a>';
-                } else
+                }
+                else
                 {
                     $data = $entity->{$col['getdatastring']}();
                 }
@@ -273,7 +289,8 @@ class listMagic
                     if (isset($this->options['LM_EXCLUDE']) && in_array($key, $this->options['LM_EXCLUDE']))
                     {
                         //excluded
-                    } else
+                    }
+                    else
                     {
                         if (!isset($headers[$key]))
                         {
@@ -284,7 +301,8 @@ class listMagic
                             elseif (isset($options['LM_DESCRIPTION'][$key]))
                             {
                                 $headers[$key] = $options['LM_DESCRIPTION'][$key];
-                            } else
+                            }
+                            else
                             {
                                 $headers[$key] = $key;
                             }
@@ -293,7 +311,8 @@ class listMagic
                         {
                             $fieldarray[] = '<a href="' . $entity->{$linkarray[$key]} . '">' . $value . '</a>';
 
-                        } else
+                        }
+                        else
                         {
                             $fieldarray[] = $value;
                         }
@@ -305,7 +324,6 @@ class listMagic
             $dataarray[] = $fieldarray;
 
         }
-
 
         if (isset($options['LM_NAME']))
         {
@@ -324,21 +342,19 @@ class listMagic
 
         $this->addHeaders($headers);
 
-
         $this->addData($dataarray);
 
         $afterTableComment = '';
         if (isset($this->options['LM_ADDNEW']))
         {
-            $afterTableComment = '<a href="'. $this->options['LM_ADDNEW'] .'">Add New ' . $name .'</a></p>';
+            $afterTableComment = '<a href="' . $this->options['LM_ADDNEW'] . '">Add New ' . $name . '</a></p>';
         }
         $this->endHTML($afterTableComment);
 
         $this->HTMLready = true;
     }
 
-
-    public function initHTML($title='')
+    public function initHTML($title = '')
     {
         if (isset($this->options['LM_DONTSORT']))
         {
@@ -350,8 +366,8 @@ class listMagic
         }
         if (isset($this->options['LM_SEARCH']))
         {
-            $search2 = $this->options['LM_SEARCH'] .' ';
-            $search1 = '<input type="search" class="light-table-filter" data-table="'.$search2.'" placeholder="Quick Filter">';
+            $search2 = $this->options['LM_SEARCH'] . ' ';
+            $search1 = '<input type="search" class="light-table-filter" data-table="' . $search2 . '" placeholder="Quick Filter">';
         }
         else
         {
@@ -359,16 +375,16 @@ class listMagic
             $search2 = '';
         }
         $this->addHTML('<div class="panel panel-default">');
-        if ($title){$this->addHTML('<div class="panel-heading"><h3 class="panel-title">' . $title. '</h3></div>');}
-    $this->addHTML('<div class="panel-body">'
-. $search1 .
-'<table class="'.$search2.'col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">'
-        );
+        if ($title)
+        {
+            $this->addHTML('<div class="panel-heading"><h3 class="panel-title">' . $title . '</h3></div>');
+        }
+        $this->addHTML('<div class="panel-body">' . $search1 . '<table class="' . $search2 . 'col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">');
     }
 
-    public function endHTML($afterTableComment='')
+    public function endHTML($afterTableComment = '')
     {
-        $this->addHTML('</table>'. $afterTableComment . '</div></div>');
+        $this->addHTML('</table>' . $afterTableComment . '</div></div>');
     }
 
     /**
