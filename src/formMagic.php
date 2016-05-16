@@ -463,7 +463,7 @@ class formMagic
                         $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     }
-                    elseif ($colum->getType() == 'INTEGER' && is_numeric($value))
+                    elseif ($colum->getType() == 'INTEGER')
                     {
                         //TODO
                         $name = 'set' . $colum->getPhpName();
