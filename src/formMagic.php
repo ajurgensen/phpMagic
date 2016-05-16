@@ -326,11 +326,14 @@ class formMagic
 
     private function addDateTimePicker($nicename,$name, \DateTime $value)
     {
-        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('m-d-y h:m:s')."' id='datetimepicker". $nicename ."' />
+        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('d-m-Y h:m:s')."' id='datetimepicker". $name ."' />
 
                         <script type='text/javascript'>
             $(function () {
-                $('#datetimepicker". $nicename ."').datetimepicker();
+                $('#datetimepicker". $name ."').datetimepicker(
+                {format: 'DD-MM-YYYY HH:MM:SS',
+                showTodayButton: true}
+                );
             });
         </script>";
         $html = $this->addFormElement($nicename,$name,$html);
@@ -477,8 +480,9 @@ class formMagic
                     }
                     elseif ($colum->getType() == 'TIMESTAMP')
                     {
+                        $postedDateTime = \DateTime::createFromFormat('d-m-Y h:m:s',$value);
                         $name = 'set' . $colum->getName();
-                        $entity->{$name}($value);
+                        $entity->{$name}($postedDateTime);
                     }
                     elseif ($colum->getType() == 'ENUM')
                     {
