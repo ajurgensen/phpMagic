@@ -183,6 +183,13 @@ class listMagic
                     $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
                     $cols[$colum->getName()]['type'] = 'INTEGER';
                 }
+                elseif ($colum->getType() == 'FLOAT')
+                {
+                    //Integer field
+                    $cols[$colum->getName()]['headername'] = $colum->getName();
+                    $cols[$colum->getName()]['getdatastring'] = 'get' . $this->propelFormatColName($this->propelFormatColName($colum->getName()));
+                    $cols[$colum->getName()]['type'] = 'FLOAT';
+                }
                 elseif ($colum->getType() == 'TIMESTAMP')
                 {
                     //Timestamp field
