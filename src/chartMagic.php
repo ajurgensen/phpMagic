@@ -43,56 +43,16 @@ class chartMagic
         $this->intName =     $this->chartName . rand(1000,9999);
     }
 
-    public function getChartHTML($width=500,$height=300,$extraDygraphOptions='')
+    public function getChartHTML($width=500,$height=300,$extraDygraphOptions='isZoomedIgnoreProgrammaticZoom: false')
     {
         $html = '<div id="'. $this->intName  .'" style="width: '.$width.'px;height: '. $height.'px;"></div>';
 
-        if ($extraDygraphOptions)
-        {
-            $extraDygraphOptions .= ",";
-        }
-
-
-        $html .= '
-
-        <script>$(document).ready
-        (
-            function ()
-            {
-                new Dygraph
-                (
-                    document.getElementById("'. $this->intName.'"),
-                    '. $this->outChartData . ',
-                        {
-                            //customBars: true,
-                            title: "'. $this->chartName .'",
-                            ' .  $extraDygraphOptions. '
-                            strokeWidth : 4,
-                            series: {"Impressions":{axis:"y"},"Clicks":{axis: "y2"}},
-                            axes:
-                            {
-                                y:
-                                    {
-                                        // set axis-related properties here
-              drawGrid: true,
-              independentTicks: true
-                                                  },
-                                y2:
-                                    {
-                                        // set axis-related properties here
-              labelsKMB: true,
-              drawGrid: true,
-              independentTicks: false
-                                                  }
-                            }
-                        //showRangeSelector: true
-                        }
-                );
-            }
-        );
-        </script>
-
-        ';
+        $html .= '<script>$(document).ready(function (){new Dygraph
+        (document.getElementById("'. $this->intName.'"),
+            '. $this->outChartData . ',
+            {title: "'. $this->chartName .'",';
+        $html .= $extraDygraphOptions;
+        $html .= '});});</script>';
         return $html;
     }
 
