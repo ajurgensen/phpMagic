@@ -40,30 +40,59 @@ class chartMagic
     function __construct($chartname)
     {
         $this->chartName = $chartname;
-        $this->intName = $this->chartName . rand(1000,9999);
+        $this->intName =     $this->chartName . rand(1000,9999);
     }
 
-    public function getChartHTML($width=500,$height=300)
+    public function getChartHTML($width=500,$height=300,$extraDygraphOptions='')
     {
         $html = '<div id="'. $this->intName  .'" style="width: '.$width.'px;height: '. $height.'px;"></div>';
 
-
-        $html .= '<script>$(document).ready(
-        function ()
+        if ($extraDygraphOptions)
         {
-            new Dygraph
-            (
-                document.getElementById("'. $this->intName.'"),['. $this->outChartData .'],
-                {
-                    //customBars: true,
-                    title: "'. $this->chartName .'",
-                    //legend: "always",
-                    //labelsDivStyles: { "textAlign": "right" },
-                    //showRangeSelector: true
-                }
-            );
-        });
-        </script>';
+            $extraDygraphOptions .= ",";
+        }
+
+
+        $html .= '
+
+        <script>$(document).ready
+        (
+            function ()
+            {
+                new Dygraph
+                (
+                    document.getElementById("'. $this->intName.'"),
+                    '. $this->outChartData . ',
+                        {
+                            //customBars: true,
+                            title: "'. $this->chartName .'",
+                            ' .  $extraDygraphOptions. '
+                            strokeWidth : 4,
+                            series: {"Impressions":{axis:"y"},"Clicks":{axis: "y2"}},
+                            axes:
+                            {
+                                y:
+                                    {
+                                        // set axis-related properties here
+              drawGrid: true,
+              independentTicks: true
+                                                  },
+                                y2:
+                                    {
+                                        // set axis-related properties here
+              labelsKMB: true,
+              drawGrid: true,
+              independentTicks: false
+                                                  }
+                            }
+                        //showRangeSelector: true
+                        }
+                );
+            }
+        );
+        </script>
+
+        ';
         return $html;
     }
 
@@ -83,29 +112,28 @@ class chartMagic
                 $loopfirst = 0;
             } else
             {
-                $outChartData .= ',';
+                $outChartData .= '+';
             }
 
-
             $first = 1;
-            $valueset = '';
             foreach ($values as $value)
             {
                 if ($first)
                 {
                     $first = 0;
-                } else
+                    $valueset = $value;
+                }
+                else
                 {
-                    $valueset = ',' . $valueset;
+                    $valueset .= ',' . $value;
                 }
 
 
-                $valueset .= $value;
 
 
             }
             $key = str_replace('-', '/', $key);
-            $outChartData .= '[new Date("' . $key . '"),' . $valueset . "]";
+            $outChartData .= '"' . $key . ',' . $valueset . '\n"';
         }
         $this->outChartData = $outChartData;
     }
