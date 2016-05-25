@@ -29,10 +29,14 @@ namespace ajurgensen\phpMagic;
 class chartMagic
 {
     var $html;
-    var $outChartData;
-    var $chartData;
     var $chartName;
     var $intName;
+    var $labels;
+    var $dataSets;
+    var $dataLegends;
+    var $dataTypes;
+    var $dataYxaixs;
+    var $dataColors;
 
     /**
      * @param $chartname Name of Chart to be build
@@ -40,19 +44,131 @@ class chartMagic
     function __construct($chartname)
     {
         $this->chartName = $chartname;
-        $this->intName =     $this->chartName . rand(1000,9999);
+        $this->intName =     str_replace(' ','',$this->chartName) . rand(1000,9999);
+        $this->dataTypes = array('bar','line');
+        $this->dataYxaixs = array(1,2);
+        $this->dataColors = array('#B71A3A','#1ABC9C');
     }
 
-    public function getChartHTML($width=500,$height=300,$extraDygraphOptions='isZoomedIgnoreProgrammaticZoom: false')
+    public function getChartHTML($width = 500, $height = 300)
     {
-        $html = '<div id="'. $this->intName  .'" style="width: '.$width.'px;height: '. $height.'px;"></div>';
+        $html = '<canvas id="' . $this->intName . '" width="' . $width . '" height="' . $height . '"></canvas>';
 
-        $html .= '<script>$(document).ready(function (){new Dygraph
-        (document.getElementById("'. $this->intName.'"),
-            '. $this->outChartData . ',
-            {title: "'. $this->chartName .'",';
-        $html .= $extraDygraphOptions;
-        $html .= '});});</script>';
+        $html .= '<script>
+var ChartData =
+{
+          labels: '. json_encode($this->labels) .',datasets:[';
+
+        $first = true;
+        foreach ($this->dataSets as $key => $dataSet)
+        {
+            if (isset($this->dataTypes[$key]))
+            {
+                $type = $this->dataTypes[$key];
+            }
+            else $type = 'line';
+
+            if (isset($this->dataYxaixs[$key]))
+            {
+                $yAxis = $this->dataYxaixs[$key];
+            }
+            else
+            {
+                $yAxis = 1;
+            }
+            if (isset($this->dataColors[$key]))
+            {
+                $color = $this->dataColors[$key];
+            }
+            else
+            {
+                $color = '#1ABC9C';
+            }
+
+            if ($first)
+            {
+                $first = false;
+            }
+            else
+            {
+                $html .=',';
+            }
+            $html .= '
+            {
+            type : "' . $type .'",
+            label:"'. $this->dataLegends[$key].'",
+            data: '. json_encode($dataSet) .',
+            fill: false,
+            borderColor: "'.$color.'",
+            backgroundColor: "'.$color.'",
+            pointBorderColor: "'.$color.'",
+            pointBackgroundColor: "'.$color.'",
+            pointHoverBackgroundColor: "'.$color.'",
+            pointHoverBorderColor: "'.$color.'",
+            borderColor: "'.$color.'",
+            yAxisID: "y-axis-'.$yAxis.'"
+            }';
+        }
+$html .= ']};</script>';
+
+
+
+
+$html .= '<script>
+var ctx = document.getElementById("' . $this->intName . '");
+var myChart = new Chart(ctx, {
+                type: \'bar\',
+                data: ChartData,
+                options: {
+                responsive: true,
+                tooltips: {
+                  mode: \'label\'
+              },
+              elements: {
+                line: {
+                    fill: false
+                }
+            },
+              scales: {
+                xAxes: [{
+                    display: true,
+                    gridLines: {
+                        display: false
+                    },
+                    labels: {
+                        show: true,
+                    }
+                }],
+                yAxes: [{
+                    type: "linear",
+                    display: true,
+                    position: "left",
+                    id: "y-axis-1",
+                    gridLines:{
+                        display: false
+                    },
+                    labels: {
+                        show:true,
+
+                    }
+                }, {
+                    type: "linear",
+                    display: true,
+                    position: "right",
+                    id: "y-axis-2",
+                    gridLines:{
+                        display: false
+                    },
+                    labels: {
+                        show:true,
+
+                    }
+                }]
+            }
+            }
+            });
+</script>';
+
         return $html;
     }
 
@@ -61,41 +177,41 @@ class chartMagic
      */
     public function loadDateData($data)
     {
-        $this->chartData = $data;
-
-        $outChartData = '';
-        $loopfirst = 1;
+        $outerCount = 0;
         foreach ($data as $key => $values)
         {
-            if ($loopfirst)
+            if (!$outerCount)
             {
-                $loopfirst = 0;
-            } else
-            {
-                $outChartData .= '+';
-            }
-
-            $first = 1;
-            foreach ($values as $value)
-            {
-                if ($first)
+                // intercept first line, includes info
+                $innerCount = 0;
+                foreach($values as $value)
                 {
-                    $first = 0;
-                    $valueset = $value;
+                    $this->dataLegends[$innerCount] = $value;
+                    $innerCount++;
                 }
-                else
-                {
-                    $valueset .= ',' . $value;
-                }
-
-
-
-
             }
-            $key = str_replace('-', '/', $key);
-            $outChartData .= '"' . $key . ',' . $valueset . '\n"';
+            else
+            {
+                //normal data, all other lines
+                $this->labels[] = $key;
+                $innerCount = 0;
+                foreach($values as $value)
+                {
+                    $this->dataSets[$innerCount][$outerCount] = $value;
+                    $innerCount++;
+                }
+            }
+            $outerCount++;
         }
-        $this->outChartData = $outChartData;
+        foreach ($this->dataSets as &$dataSet)
+        {
+            $newset = array();
+            foreach ($dataSet as $data)
+            {
+                $newset[] = $data;
+            }
+            $dataSet = $newset;
+        }
     }
 
     /**

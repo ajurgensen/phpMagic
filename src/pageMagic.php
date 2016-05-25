@@ -349,6 +349,7 @@ $(document).on(\'ready\', function() {
         $this->addJS('../vendor/eonasdan/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js');
         $this->addJS('http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js');
         $this->addJS('../vendor/kartik-v/bootstrap-fileinput/js/fileinput.min.js');
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.bundle.js');
 
 
         if ($this->defaultInitiate)
