@@ -37,6 +37,7 @@ class chartMagic
     var $dataTypes;
     var $dataYxaixs;
     var $dataColors;
+    var $type;
 
     /**
      * @param $chartname Name of Chart to be build
@@ -48,6 +49,7 @@ class chartMagic
         $this->dataTypes = array('bar','line');
         $this->dataYxaixs = array(1,2);
         $this->dataColors = array('#B71A3A','#1ABC9C');
+        $this->type = 'bar';
     }
 
     public function getChartHTML($width = 500, $height = 300)
@@ -82,7 +84,9 @@ var ChartData =
             }
             else
             {
-                $color = '#1ABC9C';
+
+                $color = '#'.substr(md5(rand()), 0, 6);
+                //$color = '#1ABC9C';
             }
 
             if ($first)
@@ -111,62 +115,27 @@ var ChartData =
         }
 $html .= ']};</script>';
 
-
-
-
 $html .= '<script>
 var ctx = document.getElementById("' . $this->intName . '");
-var myChart = new Chart(ctx, {
-                type: \'bar\',
-                data: ChartData,
-                options: {
-                responsive: true,
-                tooltips: {
-                  mode: \'label\'
-              },
-              elements: {
-                line: {
-                    fill: false
-                }
-            },
-              scales: {
-                xAxes: [{
-                    display: true,
-                    gridLines: {
-                        display: false
-                    },
-                    labels: {
-                        show: true,
-                    }
-                }],
-                yAxes: [{
-                    type: "linear",
-                    display: true,
-                    position: "left",
-                    id: "y-axis-1",
-                    gridLines:{
-                        display: false
-                    },
-                    labels: {
-                        show:true,
-
-                    }
-                }, {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    id: "y-axis-2",
-                    gridLines:{
-                        display: false
-                    },
-                    labels: {
-                        show:true,
-
-                    }
-                }]
-            }
-            }
-            });
+var myChart = new Chart(ctx,
+{
+    type: "'. $this->type .'",
+    data: ChartData,
+    options:
+    {
+        responsive: true,tooltips: {mode: "label"},
+        elements: {line: {fill: false}},
+        scales:
+        {
+            xAxes: [{stacked: true},{display: false,gridLines: {display: false},labels: {show: true,}}],
+            yAxes: [
+                    {type: "linear",display: true,position: "left",id: "y-axis-1",gridLines:{display: false},labels: {show:true}},
+                    {type: "linear",display: true,position: "right",id: "y-axis-2",gridLines:{display: false},labels: {show:true}}
+                    ]
+        }
+    }
+}
+);
 </script>';
 
         return $html;
