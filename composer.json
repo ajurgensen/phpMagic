@@ -17,7 +17,7 @@
 	"propel/propel": "^2.0@dev",
         "monolog/monolog": "^1.13@dev",
         "lmammino/jsmin4assetic": "^1.0@dev",
-        "eonasdan/bootstrap-datetimepicker": "dev-master",
+        "eonasdan/bootstrap-datetimepicker": "dev-master"
     },
     "autoload": {
         "psr-4": {
