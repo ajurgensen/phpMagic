@@ -340,17 +340,16 @@ $(document).on(\'ready\', function() {
         $this->CSSfile = '/csses.css';
 
         $this->AsseticCSS = new \Assetic\Asset\AssetCollection();
-        $this->addCSS('../vendor/twbs/bootstrap/dist/css/bootstrap.min.css');
+        $this->addCSS('https://cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css');
         $this->addCSS('../vendor/kartik-v/bootstrap-fileinput/css/fileinput.min.css');
         $this->AsseticJS = new \Assetic\Asset\AssetCollection();
-        $this->addJS('../vendor/components/jquery/jquery.min.js');
-        $this->addJS('../vendor/moment/moment/moment.js');
-        $this->addJS('../vendor/twbs/bootstrap/dist/js/bootstrap.min.js');
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js');
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js');
+        $this->addJS('https://cdn.jsdelivr.net/bootstrap/3.3.6/js/bootstrap.min.js');
         $this->addJS('../vendor/eonasdan/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js');
         $this->addJS('http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js');
         $this->addJS('../vendor/kartik-v/bootstrap-fileinput/js/fileinput.min.js');
         $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.bundle.js');
-
 
         if ($this->defaultInitiate)
         {
