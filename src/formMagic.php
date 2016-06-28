@@ -340,6 +340,25 @@ class formMagic
         return $html;
     }
 
+    private function addFormImage($src)
+    {
+        $html = '<li class="list-group-item"><div class="row">';
+        $html .= '<div class="col-xs-12">';
+        $html .= "<img src='".$src."'>";
+        $html .= '</div>';
+        $html .= '</div></li>';
+        return $html;
+    }
+
+    private function addFormTextBlock($text)
+    {
+        $html = '<li class="list-group-item"><div class="row">';
+        $html .= '<div class="col-xs-12">';
+        $html .= $text;
+        $html .= '</div>';
+        $html .= '</div></li>';
+        return $html;
+    }
 
     /**
      * @param $name
@@ -759,6 +778,16 @@ class formMagic
                 {$require = 'required';}
 
                 $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+            }
+            elseif ($colum->getType() == 'IMAGE')
+            {
+                //Image
+                $html .= $this->addFormImage($value);
+            }
+            elseif ($colum->getType() == 'TEXTBLOCK')
+            {
+                //Image
+                $html .= $this->addFormTextBlock($value);
             }
             elseif ($colum->getType() == 'FLOAT')
             {

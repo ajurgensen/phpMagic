@@ -35,6 +35,20 @@ class diyForm
         $this->map->{'set'.$name}($value);
     }
 
+    public function addImage($name,$src)
+    {
+        $col = new colum($name,'IMAGE');
+        $this->map->addColumn($col);
+        $this->map->{'set'.$name}($src);
+    }
+
+    public function addTextBlock($name,$text)
+    {
+        $col = new colum($name,'TEXTBLOCK');
+        $this->map->addColumn($col);
+        $this->map->{'set'.$name}($text);
+    }
+
     public function __construct($name = '',$validationClosure='')
     {
             $this->map = new map($name,$validationClosure);
