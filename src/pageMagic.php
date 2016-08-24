@@ -347,7 +347,7 @@ $(document).on(\'ready\', function() {
 
         $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js');
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js');
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment-with-locales.min.js');
 
         $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.3.4/js/fileinput.min.js');
         $this->addCSS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.3.4/css/fileinput.min.css');
@@ -355,7 +355,7 @@ $(document).on(\'ready\', function() {
         $this->addCSS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css');
         $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js');
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.3/Chart.bundle.js');
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js');
 
 
         if ($this->defaultInitiate)

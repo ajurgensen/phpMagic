@@ -238,7 +238,7 @@ class formMagic
         {
             session_start();
         }
-        $rnd = md5($this->formName . rand(0,1000000000000000000000));
+        $rnd = md5($this->formName . rand());
         $_SESSION[$this->formName] = $rnd;
 
         $back = 'Back';
