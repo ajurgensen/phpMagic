@@ -370,6 +370,7 @@ $(document).on(\'ready\', function() {
         if (!file_exists($localfile))
         {
                 touch($localfile, 1);
+                $this->needFileReWrite = true;
         }
         if (file_exists($css))
         {
@@ -397,6 +398,7 @@ $(document).on(\'ready\', function() {
         if (!file_exists($localfile))
         {
             touch($localfile, 1);
+            $this->needFileReWrite = true;
         }
         if (file_exists($js))
         {
