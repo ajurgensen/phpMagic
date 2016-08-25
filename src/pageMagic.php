@@ -342,10 +342,10 @@ $(document).on(\'ready\', function() {
         $this->AsseticCSS = new \Assetic\Asset\AssetCollection();
         $this->AsseticJS = new \Assetic\Asset\AssetCollection();
 
+        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js');
+
         $this->addCSS('https://cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css');
         $this->addJS('https://cdn.jsdelivr.net/bootstrap/3.3.6/js/bootstrap.min.js');
-
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js');
 
         $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment-with-locales.min.js');
 
