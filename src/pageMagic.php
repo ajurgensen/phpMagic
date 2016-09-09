@@ -78,9 +78,8 @@ class pageMagic
 
     private function sessionForUser()
     {
-        return md5($_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'] . $_SERVER['HTTP_HOST'] );
+        return md5($_SERVER['HTTP_USER_AGENT'] . ' SOME SALT VALUE 123 '.$_SERVER['HTTP_HOST'] );
     }
-
 
     public function addFileUploader($title='',$autotranslate=0)
     {
