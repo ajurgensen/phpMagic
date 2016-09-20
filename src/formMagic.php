@@ -669,7 +669,8 @@ class formMagic
             {
                 //TODO - phpname only needed for a few cases
                 $name = 'get' . $colum->getPhpName();
-                if (!$value = $entity->{$name}())
+                $value = $entity->{$name}();
+                if (is_null($value))
                 {
                     $value = '';
                 }
