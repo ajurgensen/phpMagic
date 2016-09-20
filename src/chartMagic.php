@@ -129,8 +129,8 @@ var myChart = new Chart(ctx,
         {
             xAxes: [{stacked: true},{display: false,gridLines: {display: false},labels: {show: true,}}],
             yAxes: [
-                    {type: "linear",display: true,position: "left",id: "y-axis-1",gridLines:{display: false},labels: {show:true}},
-                    {type: "linear",display: true,position: "right",id: "y-axis-2",gridLines:{display: false},labels: {show:true}}
+                    {type: "linear",stacked: true,display: true,position: "left",id: "y-axis-1",gridLines:{display: false},labels: {show:true}},
+                    {type: "linear",stacked: true,display: true,position: "right",id: "y-axis-2",gridLines:{display: false},labels: {show:true}}
                     ]
         }
     }
