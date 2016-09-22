@@ -279,7 +279,7 @@ class listMagic
                     }
                     $data = '<a href="' . $entity->{$col['link']} . '">' . $data . '</a>';
                 }
-                if ($data)
+                if (!is_null($data))
                 {
                     $fieldarray[] = $data;
                 }

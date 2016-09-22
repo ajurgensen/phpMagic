@@ -326,12 +326,12 @@ class formMagic
 
     private function addDateTimePicker($nicename,$name, \DateTime $value)
     {
-        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('d-m-Y h:m:s')."' id='datetimepicker". $name ."' />
+        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('d-m-Y H:m:s')."' id='datetimepicker". $name ."' />
 
                         <script type='text/javascript'>
             $(function () {
                 $('#datetimepicker". $name ."').datetimepicker(
-                {format: 'DD-MM-YYYY HH:MM:SS',
+                {format: 'DD-MM-YYYY HH:mm:ss',
                 showTodayButton: true}
                 );
             });
@@ -485,7 +485,7 @@ class formMagic
                     elseif ($colum->getType() == 'INTEGER')
                     {
                         //TODO
-                        $name = 'set' . $colum->getPhpName();
+                        $name = 'set' . $colum->getName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'TINYINT' && is_numeric($value) && $value < 256)
@@ -499,7 +499,7 @@ class formMagic
                     }
                     elseif ($colum->getType() == 'TIMESTAMP')
                     {
-                        $postedDateTime = \DateTime::createFromFormat('d-m-Y h:m:s',$value);
+                        $postedDateTime = \DateTime::createFromFormat('d-m-Y H:m:s',$value);
                         $name = 'set' . $colum->getName();
                         $entity->{$name}($postedDateTime);
                     }
@@ -660,10 +660,10 @@ class formMagic
             elseif (!$this->getFromPropel())
             {
                 $name = 'get' . $colum->getName();
-                if (!$value = $entity->{$name}())
-                {
+                if (is_null($entity->{$name}()))
                     $value = '';
-                }
+                else
+                    $value = $entity->{$name}();
             }
             else
             {
@@ -671,9 +671,7 @@ class formMagic
                 $name = 'get' . $colum->getPhpName();
                 $value = $entity->{$name}();
                 if (is_null($value))
-                {
                     $value = '';
-                }
             }
             //If we have a Name override use it
             if (isset($names[$colum->getName()]))
@@ -688,6 +686,11 @@ class formMagic
                     throw new \Exception('You must Implement the "translate" function as global to use Autotranslate');
                 }
                 $newname = translate('FM_' . $colum->getName());
+            }
+            //for DIYform
+            elseif (isset($colum->diyDesc))
+            {
+                $newname = $colum->diyDesc;
             }
             else
             {
@@ -769,7 +772,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' type="number" data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'TINYINT')
             {
@@ -778,7 +781,7 @@ class formMagic
                 if ($this->fromPropel && $colum->isNotNull())
                 {$require = 'required';}
 
-                $html .= $this->addFormInputText($newname, $colum, $value, ' data-parsley-trigger="change" ' . $require . ' ');
+                $html .= $this->addFormInputText($newname, $colum, $value, ' type="range" data-parsley-range="[0, 255]" data-parsley-trigger="change" ' . $require . ' ');
             }
             elseif ($colum->getType() == 'IMAGE')
             {

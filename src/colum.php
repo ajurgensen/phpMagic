@@ -29,6 +29,7 @@ namespace ajurgensen\phpMagic;
 class colum
 {
     private $staticVars;
+    public $diyDesc;
 
     public function isPrimaryKey()
     {
