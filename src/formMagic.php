@@ -326,7 +326,7 @@ class formMagic
 
     private function addDateTimePicker($nicename,$name, \DateTime $value)
     {
-        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('d-m-Y H:m:s')."' id='datetimepicker". $name ."' />
+        $html = "            <input type='text' name='".$name."' class='form-control' value='".$value->format('d-m-Y H:i:s')."' id='datetimepicker". $name ."' />
 
                         <script type='text/javascript'>
             $(function () {
@@ -499,7 +499,7 @@ class formMagic
                     }
                     elseif ($colum->getType() == 'TIMESTAMP')
                     {
-                        $postedDateTime = \DateTime::createFromFormat('d-m-Y H:m:s',$value);
+                        $postedDateTime = \DateTime::createFromFormat('d-m-Y H:i:s',$value);
                         $name = 'set' . $colum->getName();
                         $entity->{$name}($postedDateTime);
                     }
