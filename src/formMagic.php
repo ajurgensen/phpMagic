@@ -485,7 +485,7 @@ class formMagic
                     elseif ($colum->getType() == 'INTEGER')
                     {
                         //TODO
-                        $name = 'set' . $colum->getName();
+                        $name = 'set' . $colum->getPhpName();
                         $entity->{$name}($value);
                     }
                     elseif ($colum->getType() == 'TINYINT' && is_numeric($value) && $value < 256)
