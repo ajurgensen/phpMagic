@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 namespace ajurgensen\phpMagic;
+use SimpleExcel\SimpleExcel;
 
 /**
  * Class listMagic
@@ -37,6 +38,8 @@ class listMagic
     public $HTMLready;
     private $options;
     private $fromPropel;
+    private $dataArray;
+    private $headerArray;
 
     /**
      * @return mixed
@@ -56,12 +59,40 @@ class listMagic
 
     private function addHTML($html)
     {
-        $this->html .= $html;
+        $this->html .= $html . "\r\n";
     }
 
     public function getHTML()
     {
+        foreach ($_GET as $param => $hest)
+        {
+            if ($param == "report_" . $this->stripName($this->options['LM_DOWNLOAD']))
+            {
+                $this->getCSV();
+            }
+        }
         return $this->html;
+    }
+
+    public function getCSV()
+    {
+        $filename = $this->stripName($this->options['LM_DOWNLOAD']);
+        $pe = new \PHPExcel();
+
+        $array = array_merge([$this->headerArray],$this->dataArray);
+
+        $pe->setActiveSheetIndex(0)->fromArray($array);
+
+        header("Pragma: public");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/octet-stream");
+        header("Content-Type: application/download");;
+        header("Content-Disposition: attachment;filename=$filename.xls");
+        header("Content-Transfer-Encoding: binary ");
+        $objWriter = new \PHPExcel_Writer_Excel5($pe);
+        $objWriter->save('php://output');
     }
 
     private function propelFormatColName($colname)
@@ -95,6 +126,10 @@ class listMagic
                 $entity = $first_ob;
                 break;
             }
+        }
+        else
+        {
+            return;
         }
 
         $nolinking = 0;
@@ -332,6 +367,9 @@ class listMagic
 
         }
 
+        $this->dataArray = $dataarray;
+        $this->headerArray = $headers;
+
         if (isset($options['LM_NAME']))
         {
             $name = $options['LM_NAME'];
@@ -384,14 +422,26 @@ class listMagic
         $this->addHTML('<div class="panel panel-default">');
         if ($title)
         {
-            $this->addHTML('<div class="panel-heading"><h3 class="panel-title">' . $title . '</h3></div>');
+            $this->addHTML('<div class="panel-heading"><h3 class="panel-title">' . $title    .'</h3></div>');
         }
         $this->addHTML('<div class="panel-body">' . $search1 . '<table class="' . $search2 . 'col-md-12 table-bordered table-striped table-condensed cf ' . $sortable . '">');
     }
 
     public function endHTML($afterTableComment = '')
     {
-        $this->addHTML('</table>' . $afterTableComment . '</div></div>');
+        $downloadLink = '';
+        $this->addHTML('</tbody>');
+        if (isset($this->options['LM_DOWNLOAD']))
+        {
+            $downloadName = $this->stripName($this->options['LM_DOWNLOAD']);
+            $downloadLink = "<a href='?report_".$downloadName."'>Download " . $this->options['LM_DOWNLOAD']."</a> ";
+        }
+        $this->addHTML('</table>'.   $downloadLink . $afterTableComment . '</div></div>');
+    }
+
+    public function stripName($name)
+    {
+        return preg_replace('/\s+/', '', $name);
     }
 
     /**
@@ -399,14 +449,20 @@ class listMagic
      */
     public function addHeaders($headers)
     {
-        $this->addHTML('<thead class="cf"><tr>');
-
-        foreach ($headers as $header)
+        if (count($headers))
         {
-            $this->addHTML('<th>' . $header . '</th>');
-        }
+            $this->addHTML('<thead class="cf"><tr>');
 
-        $this->addHTML('</thead></tr>');
+            $first = true;
+            foreach ($headers as $header)
+            {
+                $this->addHTML('<th>' . $header . '</th>');
+            }
+
+            $this->addHTML('</tr></thead>');
+            $this->addHTML('<tbody>');
+        }
+        $this->headerArray = $headers;
     }
 
     /**
@@ -430,5 +486,6 @@ class listMagic
 
             $this->addHTML('</tr>');
         }
+        $this->dataArray = $dataarray;
     }
 }
