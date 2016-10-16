@@ -129,7 +129,7 @@ class listMagic
         }
         else
         {
-            return;
+            $entites = [];
         }
 
         $nolinking = 0;
@@ -392,7 +392,7 @@ class listMagic
         $afterTableComment = '';
         if (isset($this->options['LM_ADDNEW']))
         {
-            $afterTableComment = '<a href="' . $this->options['LM_ADDNEW'] . '">Add New ' . $name . '</a></p>';
+            $afterTableComment = '<a href="' . $this->options['LM_ADDNEW'] . '">Add New</a></p>';
         }
         $this->endHTML($afterTableComment);
 
