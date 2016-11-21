@@ -40,6 +40,7 @@ class listMagic
     private $fromPropel;
     private $dataArray;
     private $headerArray;
+    private $empty;
 
     /**
      * @return mixed
@@ -114,6 +115,7 @@ class listMagic
      */
     function __construct($entites = array(), $options = array(), $names = array())
     {
+        $this->empty = false;
         $this->options = $options;
         $this->HTMLready = true;
         $this->setFromPropel(0);
@@ -130,6 +132,7 @@ class listMagic
         else
         {
             $entites = [];
+            $this->empty = true;
         }
 
         $nolinking = 0;
@@ -401,6 +404,10 @@ class listMagic
 
     public function initHTML($title = '')
     {
+        if ($this->empty)
+        {
+            return;
+        }
         if (isset($this->options['LM_DONTSORT']))
         {
             $sortable = '';
@@ -436,7 +443,16 @@ class listMagic
             $downloadName = $this->stripName($this->options['LM_DOWNLOAD']);
             $downloadLink = "<a href='?report_".$downloadName."'>Download " . $this->options['LM_DOWNLOAD']."</a> ";
         }
-        $this->addHTML('</table>'.   $downloadLink . $afterTableComment . '</div></div>');
+        if ($this->empty)
+        {
+            $this->addHTML($afterTableComment);
+
+        }
+        else
+        {
+            $this->addHTML('</table>'.   $downloadLink . $afterTableComment . '</div></div>');
+        }
+
     }
 
     public function stripName($name)
@@ -470,6 +486,7 @@ class listMagic
      */
     public function addData($dataarray)
     {
+        $this->empty = false;
         foreach ($dataarray as $fieldarray)
         {
             $this->addHTML('<tr>');

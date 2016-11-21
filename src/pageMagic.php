@@ -248,7 +248,7 @@ $(document).on(\'ready\', function() {
         $this->addHtml($this->getPanel($text,$title));
     }
 
-    public function addMenu($menu,$brand='')
+    public function addMenu($menu,$brand='',$rightmenu='')
     {
         $this->addHtml('<nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -274,7 +274,7 @@ $(document).on(\'ready\', function() {
             }
             elseif (is_array($submenu))
             {
-                $this->addHtml('<ul class="nav navbar-nav">
+                $this->addHtml('<ul class="nav navbar-nav navbar-left">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">&nbsp; ' . $heading . '<span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">');
@@ -293,6 +293,40 @@ $(document).on(\'ready\', function() {
               </li>');
 
         }
+
+        if ($rightmenu)
+        {
+
+            foreach ($rightmenu as $heading => $submenu)
+            {
+                if ($heading == 'PM_FORM')
+                {
+
+                    $this->addHtml($submenu);
+                }
+                elseif (is_array($submenu))
+                {
+                    $this->addHtml('<ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">&nbsp; ' . $heading . '<span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">');
+                    foreach ($submenu as $submenuheading => $link)
+                    {
+
+                        $this->addHtml('<li><a href="' . $link . '"><span>&nbsp; ' . $submenuheading . '</span></a></li>');
+                    }
+                }
+                else
+                {
+                    $this->addHtml('<li><a href="'.$submenu.'">'.$heading.'</a></li>');
+                }
+
+                $this->addHtml('</ul>
+              </li>');
+
+            }
+        }
+
 
         $this->addHtml('</ul></div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
@@ -341,20 +375,23 @@ $(document).on(\'ready\', function() {
         $this->AsseticCSS = new \Assetic\Asset\AssetCollection();
         $this->AsseticJS = new \Assetic\Asset\AssetCollection();
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js');
 
-        $this->addCSS('https://cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css');
-        $this->addJS('https://cdn.jsdelivr.net/bootstrap/3.3.6/js/bootstrap.min.js');
+        $public = '../vendor/ajurgensen/php-magic/public/';
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment-with-locales.min.js');
+        $this->addJS($public . 'js/jquery.min.js');
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.3.4/js/fileinput.min.js');
-        $this->addCSS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.3.4/css/fileinput.min.css');
+        $this->addCSS($public . 'css/bootstrap.min.css');
+        $this->addJS($public . 'js/bootstrap.min.js');
 
-        $this->addCSS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css');
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js');
+        $this->addJS($public . 'js/moment-with-locales.min.js');
 
-        $this->addJS('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js');
+        $this->addJS(  $public . 'js/fileinput.min.js');
+        $this->addCSS( $public . 'css/fileinput.min.css');
+
+        $this->addCSS( $public . 'css/bootstrap-datetimepicker.min.css');
+        $this->addJS(  $public . 'js/bootstrap-datetimepicker.min.js');
+
+        $this->addJS($public . 'js/Chart.bundle.min.js');
 
 
         if ($this->defaultInitiate)
