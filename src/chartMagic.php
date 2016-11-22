@@ -47,8 +47,8 @@ class chartMagic
         $this->chartName = $chartname;
         $this->intName =     str_replace(' ','',$this->chartName) . rand(1000,9999);
         $this->dataTypes = array('bar','line');
-        $this->dataYxaixs = array(1,2);
-        $this->dataColors = array('#98DA72','#da4444');
+        $this->dataYxaixs = array(1,2,2);
+        $this->dataColors = array('#98DA72','#da4444','#009DFF');
         $this->type = 'bar';
     }
 
