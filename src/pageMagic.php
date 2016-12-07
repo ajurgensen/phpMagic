@@ -391,6 +391,11 @@ $(document).on(\'ready\', function() {
         $this->addCSS( $public . 'css/bootstrap-datetimepicker.min.css');
         $this->addJS(  $public . 'js/bootstrap-datetimepicker.min.js');
 
+
+
+        $this->addCSS( $public . 'css/daterangepicker.css');
+        $this->addJS(  $public . 'js/daterangepicker.js');
+
         $this->addJS($public . 'js/Chart.bundle.min.js');
 
 
