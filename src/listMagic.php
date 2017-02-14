@@ -144,6 +144,7 @@ class listMagic
         $nolinking = 0;
         //if (method_exists($entity,'toArray'))
         if (isset($entity) && method_exists($entity, 'configMagic'))
+        if (isset($entity) && method_exists($entity, 'configMagic'))
         {
             //configMagicDIY form
             $this->setFromPropel(0);
@@ -392,8 +393,6 @@ class listMagic
             $name = '';
         }
 
-        if ($this->empty) return;
-
         //Third loop, build HTML from objects
         $this->initHTML($name);
 
@@ -443,7 +442,7 @@ class listMagic
     {
         $downloadLink = '';
         $this->addHTML('</tbody>');
-        if (isset($this->options['LM_DOWNLOAD']))
+        if (isset($this->options['LM_DOWNLOAD']) && !$this->empty)
         {
             $downloadName = $this->stripName($this->options['LM_DOWNLOAD']);
             $downloadLink = "<a href='?report_".$downloadName."'>Download " . $this->options['LM_DOWNLOAD']."</a> ";
@@ -491,9 +490,10 @@ class listMagic
      */
     public function addData($dataarray)
     {
-        $this->empty = false;
+
         foreach ($dataarray as $fieldarray)
         {
+            $this->empty = false;
             $this->addHTML('<tr>');
             foreach ($fieldarray as $col)
             {
