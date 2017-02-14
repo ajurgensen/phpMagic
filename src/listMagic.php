@@ -144,7 +144,6 @@ class listMagic
         $nolinking = 0;
         //if (method_exists($entity,'toArray'))
         if (isset($entity) && method_exists($entity, 'configMagic'))
-        if (isset($entity) && method_exists($entity, 'configMagic'))
         {
             //configMagicDIY form
             $this->setFromPropel(0);
