@@ -82,6 +82,12 @@ class listMagic
 
         $array = array_merge([$this->headerArray],$this->dataArray);
 
+        if ($comments = $this->options['LM_DOWNLOAD_TEXTBLOCK'])
+        {
+            $array = array_merge($comments,$array);
+        }
+
+
         $pe->setActiveSheetIndex(0)->fromArray($array);
 
         header("Pragma: public");
@@ -385,6 +391,9 @@ class listMagic
         {
             $name = '';
         }
+
+        if ($this->empty) return;
+
         //Third loop, build HTML from objects
         $this->initHTML($name);
 
@@ -404,10 +413,6 @@ class listMagic
 
     public function initHTML($title = '')
     {
-        if ($this->empty)
-        {
-            return;
-        }
         if (isset($this->options['LM_DONTSORT']))
         {
             $sortable = '';

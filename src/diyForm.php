@@ -60,6 +60,13 @@ class diyForm
         $this->map->{'set'.$name}($text);
         if ($diyDesc) $col->diyDesc = $diyDesc;
     }
+    public function addTimeStamp($name,$text,$diyDesc = '')
+    {
+        $col = new colum($name,'TIMESTAMP');
+        $this->map->addColumn($col);
+        $this->map->{'set'.$name}($text);
+        if ($diyDesc) $col->diyDesc = $diyDesc;
+    }
 
     public function __construct($name = '',$validationClosure='')
     {
